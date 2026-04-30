@@ -38,7 +38,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 let roundID = window.location.pathname.split('/')[2];
-let activeZ  = 1;
+let activeZ     = 1;   // webmap tile z (index into z_levels)
+let activeGameZ = 2;   // game db z (what's stored in tbl_death.z_coord etc.)
 let tileLayer = null;
 let map = null;
 
@@ -52,12 +53,12 @@ var corpses   = L.layerGroup();
 var bombs     = L.layerGroup();
 var logLayers = {};       // filename → L.layerGroup
 
-// ── Render helpers — clear and repopulate a layer for the current activeZ ──
+// ── Render helpers — clear and repopulate a layer for the current activeGameZ ──
 function renderDeaths() {
   corpses.clearLayers();
   if (!deathsData) return;
   deathsData.forEach(function(d) {
-    if (parseInt(d.z) !== activeZ) return;
+    if (parseInt(d.z) !== activeGameZ) return;
     L.polygon([
       tg2leaf(d.x,   d.y),
       tg2leaf(d.x-1, d.y),
@@ -80,7 +81,7 @@ function renderBombs() {
   bombs.clearLayers();
   if (!bombsData) return;
   bombsData.forEach(function(e) {
-    if (String(e.z) !== String(activeZ)) return;
+    if (parseInt(e.z) !== activeGameZ) return;
     if (e.flash > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'white', radius:+e.flash+.5}).bindPopup("Flash: " + e.flash + " at " + e.area).addTo(bombs);
     if (e.light > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'yellow',radius:+e.light+.5}).bindPopup("Light: " + e.light + " at " + e.area).addTo(bombs);
     if (e.heavy > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'orange',radius:+e.heavy+.5}).bindPopup("Heavy: " + e.heavy + " at " + e.area).addTo(bombs);
@@ -92,7 +93,7 @@ function renderLogLayer(filename) {
   if (!logLayers[filename] || !logRawData[filename]) return;
   logLayers[filename].clearLayers();
   logRawData[filename].forEach(function(line) {
-    if (parseInt(line.z) !== activeZ) return;
+    if (parseInt(line.z) !== activeGameZ) return;
     L.polygon([
       tg2leaf(line.x,   line.y),
       tg2leaf(line.x-1, line.y),
@@ -112,12 +113,14 @@ fetch('/rounds/' + roundID + '?format=json')
     let tilesBase = null;
     let zLevels   = [1];
     let zNames    = ['Station'];
+    let gameZMap  = [2];   // gameZMap[i] = game db z for zLevels[i]
 
     if (data.webmap) {
       if (data.webmap.tiles)    tilesBase = data.webmap.tiles;
       if (data.webmap.main_z)   activeZ   = data.webmap.main_z;
       if (data.webmap.z_levels) zLevels   = data.webmap.z_levels;
       if (data.webmap.z_names)  zNames    = data.webmap.z_names;
+      if (data.webmap.game_z)   gameZMap  = data.webmap.game_z;
     }
 
     // Bounds match our tile pyramid: [[-256,0],[0,256]] covers the 255×255 map.
@@ -135,6 +138,8 @@ fetch('/rounds/' + roundID + '?format=json')
 
     function switchTileLayer(z) {
       activeZ = z;
+      var zIdx = zLevels.indexOf(z);
+      activeGameZ = (zIdx >= 0 && gameZMap[zIdx] !== undefined) ? gameZMap[zIdx] : z;
 
       // Swap base tile layer
       if (tileLayer) map.removeLayer(tileLayer);
@@ -192,7 +197,7 @@ fetch('/rounds/' + roundID + '?format=json')
       document.getElementById('deaths').classList.remove('invisible');
       document.getElementById('deathCount').textContent = data.deaths;
     }
-    if (data.stats && data.stats.explosion) {
+    if (data.stats && ('explosion' in data.stats)) {
       document.getElementById('bombs').classList.remove('invisible');
     }
 
