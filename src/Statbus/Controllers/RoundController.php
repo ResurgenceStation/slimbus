@@ -244,7 +244,7 @@ class RoundController Extends Controller {
     $logs = (new LogsController($this->container, $round))->getGameLogs($this->page);
     $round->pages = (new LogsController($this->container, $round))->getPages();
 
-    if(!$logs){
+    if($logs === false){
       return $this->view->render($response, 'base/error.tpl',[
         'message'  => "Alt DB not configured. No parsed logs available",
         'code'     => 500,

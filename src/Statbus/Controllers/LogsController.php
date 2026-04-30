@@ -325,8 +325,8 @@ class LogsController Extends Controller {
           'role'       => $e['special'],
           'roundstart' => (int) $e['when']
         ]);
-      } catch (Exception $e){
-        var_dump($e->getMessage());
+      } catch (\Exception $e){
+        // skip duplicate manifest entry
       }
     }
   }
@@ -414,7 +414,7 @@ class LogsController Extends Controller {
               $this->alt_db->insert('round_logs',[
               'round'     => $this->round->id,
               'timestamp' => $entry['time'],
-              'type'      => $entry['type'],
+              'type'      => substr($entry['type'], 0, 16),
               'text'      => filter_var($entry['text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS,FILTER_FLAG_NO_ENCODE_QUOTES),
               'x'         => $entry['x'],
               'y'         => $entry['y'],
@@ -422,8 +422,8 @@ class LogsController Extends Controller {
               'area'      => filter_var($entry['area'],FILTER_SANITIZE_FULL_SPECIAL_CHARS,FILTER_FLAG_NO_ENCODE_QUOTES)
             ]);
               $i++;
-            } catch (Exception $e){
-              echo $e->getMessage();
+            } catch (\Exception $e){
+              // skip malformed line
             }
           }
         }
@@ -452,13 +452,12 @@ class LogsController Extends Controller {
               $entry['y']    = $t[4];
               $entry['z']    = $t[5];
               $entry['area'] = $t[2];
-              // var_dump($merge);
             }
             try{
               $this->alt_db->insert('round_logs',[
               'round'     => $this->round->id,
               'timestamp' => $entry['time'],
-              'type'      => $entry['type'],
+              'type'      => substr($entry['type'], 0, 16),
               'text'      => filter_var($entry['text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS,FILTER_FLAG_NO_ENCODE_QUOTES),
               'x'         => $entry['x'],
               'y'         => $entry['y'],
@@ -466,8 +465,8 @@ class LogsController Extends Controller {
               'area'      => filter_var($entry['area'], FILTER_SANITIZE_FULL_SPECIAL_CHARS,FILTER_FLAG_NO_ENCODE_QUOTES)
             ]);
               $i++;
-            } catch (Exception $e){
-              echo $e->getMessage();
+            } catch (\Exception $e){
+              // skip malformed line
             }
           }
         }
