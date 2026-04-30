@@ -93,12 +93,21 @@ class LogsController Extends Controller {
   public function listing(){
     if(!$this->hasLogs) return false;
     $allowed = [
+      // HTML investigate logs
       'atmos.html', 'cargo.html', 'gravity.html', 'hallucinations.html',
-      'initialize.txt', 'manifest.txt', 'newscaster.json', 'pda.txt',
-      'portals.html', 'profiler.json', 'qdel.txt', 'radiation.html',
-      'records.html', 'research.html', 'round_end_data.json', 'runtime.txt',
-      'singulo.html', 'telecomms.txt', 'supermatter.html', 'wires.html',
-      'game.txt', 'attack.txt',
+      'portals.html', 'radiation.html', 'records.html', 'research.html',
+      'singulo.html', 'supermatter.html', 'wires.html',
+      // JSON logs
+      'newscaster.json', 'round_end_data.json', 'profiler.json',
+      // .log variants (HippieStation / modern tg)
+      'game.log', 'attack.log', 'runtime.log', 'pda.log',
+      'manifest.log', 'telecomms.log', 'qdel.log', 'initialize.log',
+      'asset.log', 'hrefs.log', 'overlay.log', 'virus.log',
+      'sql.log', 'tgui.log', 'job_debug.log', 'map_errors.log',
+      'config_error.log',
+      // .txt variants (legacy tg)
+      'game.txt', 'attack.txt', 'runtime.txt', 'pda.txt',
+      'manifest.txt', 'telecomms.txt', 'qdel.txt', 'initialize.txt',
     ];
     if($this->log_dir){
       foreach($allowed as $filename){
@@ -119,30 +128,20 @@ class LogsController Extends Controller {
   }
 
   public function getFile($file, $format = false){
-    if (!in_array($file, [
-      'atmos.html',
-      // 'attack.txt',
-      'cargo.html',
-      // 'game.txt',
-      'gravity.html',
-      'hallucinations.html',
-      'initialize.txt',
-      'manifest.txt',
-      'newscaster.json',
-      'pda.txt',
-      'portals.html',
-      'profiler.json',
-      'qdel.txt',
-      'radiation.html',
-      'records.html',
-      'research.html',
-      'round_end_data.json',
-      'runtime.txt',
-      'singulo.html',
-      'telecomms.txt',
-      'supermatter.html',
-      'wires.html',
-    ])) {
+    $viewable = [
+      'atmos.html', 'cargo.html', 'gravity.html', 'hallucinations.html',
+      'portals.html', 'radiation.html', 'records.html', 'research.html',
+      'singulo.html', 'supermatter.html', 'wires.html',
+      'newscaster.json', 'round_end_data.json', 'profiler.json',
+      'game.log', 'attack.log', 'runtime.log', 'pda.log',
+      'manifest.log', 'telecomms.log', 'qdel.log', 'initialize.log',
+      'asset.log', 'hrefs.log', 'overlay.log', 'virus.log',
+      'sql.log', 'tgui.log', 'job_debug.log', 'map_errors.log',
+      'config_error.log',
+      'game.txt', 'attack.txt', 'runtime.txt', 'pda.txt',
+      'manifest.txt', 'telecomms.txt', 'qdel.txt', 'initialize.txt',
+    ];
+    if (!in_array($file, $viewable)) {
       return false;
     }
     $this->file = $this->readFileContent($file);
@@ -380,7 +379,7 @@ class LogsController Extends Controller {
 
   public function processGameLogs(){
     $i = 0;
-    $handle = $this->openFileHandle("game.txt");
+    $handle = $this->openFileHandle("game.log") ?: $this->openFileHandle("game.txt");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
           $tmp = [];
@@ -435,7 +434,7 @@ class LogsController Extends Controller {
       fclose($handle);
     }
 
-    $handle = $this->openFileHandle("attack.txt");
+    $handle = $this->openFileHandle("attack.log") ?: $this->openFileHandle("attack.txt");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
           $tmp = [];
