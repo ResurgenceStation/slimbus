@@ -40,7 +40,7 @@
         {% if round.logs %}
           <a class="btn btn-primary btn-sm" href="{{round.remote_logs_dir}}" target="_blank" rel="noopener noreferrer">Original <i class="fas fa-external-link-alt"></i></a>
           {% if round.server_data.demo_viewer is defined and round.server_data.demo_viewer %}
-          <a class="btn btn-primary btn-sm" href="{{round.server_data.demo_viewer}}/?demo_url={{round.remote_logs_dir|trim('/')}}/demo.txt.gz" target="_blank" rel="noopener noreferrer">Watch Replay <i class="fas fa-external-link-alt"></i></a>
+          <a class="btn btn-primary btn-sm" href="{{round.server_data.demo_viewer}}/?demo_url={{round.remote_logs_dir|trim('/')}}/demo.log" target="_blank" rel="noopener noreferrer">Watch Replay <i class="fas fa-external-link-alt"></i></a>
           {% endif %}
           {% if user.canAccessTGDB %}
             <a class="btn btn-primary btn-sm" href="{{round.admin_logs_dir}}" target="_blank" rel="noopener noreferrer">Original <i class="fas fa-external-link-alt"></i></a>
