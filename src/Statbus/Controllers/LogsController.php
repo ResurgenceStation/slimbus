@@ -385,9 +385,14 @@ class LogsController Extends Controller {
         while (($line = fgets($handle)) !== false) {
           $tmp = [];
           $entry = [];
-          if(!preg_match("/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3})] (\w*): (.*)/", $line, $tmp)) continue;
+          // Match full datetime [YYYY-MM-DD HH:MM:SS.mmm] or time-only [HH:MM:SS.mmm]
+          if(!preg_match("/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[.,]\d+|\d{2}:\d{2}:\d{2}(?:[.,]\d+)?)] (\w+): (.*)/", $line, $tmp)) continue;
           $entry['type'] = $tmp[2];
-          $entry['time'] = $tmp[1];
+          $ts = $tmp[1];
+          if(strlen($ts) <= 15 && $this->log_dir && preg_match('#(\d{4})/(\d{2})/(\d{2})#', $this->log_dir, $dm)){
+            $ts = $dm[1].'-'.$dm[2].'-'.$dm[3].' '.$ts;
+          }
+          $entry['time'] = $ts;
           $entry['text'] = $tmp[3];
           $entry['x']    = null;
           $entry['y']    = null;
@@ -435,9 +440,14 @@ class LogsController Extends Controller {
         while (($line = fgets($handle)) !== false) {
           $tmp = [];
           $entry = [];
-          if(!preg_match("/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3})] (\w*): (.*)/", $line, $tmp)) continue;
+          // Match full datetime [YYYY-MM-DD HH:MM:SS.mmm] or time-only [HH:MM:SS.mmm]
+          if(!preg_match("/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[.,]\d+|\d{2}:\d{2}:\d{2}(?:[.,]\d+)?)] (\w+): (.*)/", $line, $tmp)) continue;
           $entry['type'] = $tmp[2];
-          $entry['time'] = $tmp[1];
+          $ts = $tmp[1];
+          if(strlen($ts) <= 15 && $this->log_dir && preg_match('#(\d{4})/(\d{2})/(\d{2})#', $this->log_dir, $dm)){
+            $ts = $dm[1].'-'.$dm[2].'-'.$dm[3].' '.$ts;
+          }
+          $entry['time'] = $ts;
           $entry['text'] = $tmp[3];
           $entry['x']    = null;
           $entry['y']    = null;

@@ -46,53 +46,48 @@ fetch('/rounds/' + roundID + '?format=json')
   .then(r => r.json())
   .then(function(data) {
 
-    // ── Tile base URL ─────────────────────────────────────────────────────────
-    // Prefer server-configured affectedarc07 webmap; fall back to legacy renderbus
-    let tilesBase = null;
+    // ── Webmap config ─────────────────────────────────────────────────────────
+    let imageBase = null;  // e.g. "https://mocha.affectedarc07.co.uk/webmap/hippie/hippiestation/hippiestation"
     let zLevels   = [2];
     let zNames    = ['Station'];
 
-    if (data.webmap && data.webmap.tiles) {
-      tilesBase = data.webmap.tiles;
-      if (data.webmap.main_z)  activeZ  = data.webmap.main_z;
+    if (data.webmap && data.webmap.image_base) {
+      imageBase = data.webmap.image_base;
+      if (data.webmap.main_z)   activeZ  = data.webmap.main_z;
       if (data.webmap.z_levels) zLevels  = data.webmap.z_levels;
       if (data.webmap.z_names)  zNames   = data.webmap.z_names;
-    } else if (data.map_url) {
-      tilesBase = 'legacy:' + data.map_url;
     }
+
+    // Map bounds in Leaflet CRS.Simple matching tg2leaf coordinate system
+    // tg2leaf(x,y) = [y-255, x], so bottom-left=(1,1)→[-254,1], top-right=(255,255)→[0,255]
+    var imgBounds = [[-255, 0], [0, 255]];
 
     // ── Leaflet map init ──────────────────────────────────────────────────────
     map = L.map("map", {
       attributionControl: true,
-      minZoom: 1,
+      minZoom: 0,
       maxZoom: 7,
-      maxBounds: [[0, 0], [-256, 256]],
+      maxBounds: [[-300, -50], [50, 305]],
       crs: L.CRS.Simple,
       preferCanvas: true,
     }).setView([-128, 128], 2);
 
-    function buildTileUrl(z) {
-      if (tilesBase && !tilesBase.startsWith('legacy:')) {
-        return tilesBase + '/' + z + '/{z}/{x}/{y}.png';
-      }
-      // Legacy renderbus fallback
-      let mapUrl = tilesBase ? tilesBase.replace('legacy:', '') : '';
-      return 'https://renderbus.s3.amazonaws.com/tiles/' + mapUrl + '/{z}/tile_{x}-{y}.png';
-    }
-
     function switchTileLayer(z) {
       activeZ = z;
       if (tileLayer) map.removeLayer(tileLayer);
-      tileLayer = L.tileLayer(buildTileUrl(z), {
-        minZoom: 1,
-        maxZoom: 7,
-        maxNativeZoom: 5,
-        continuousWorld: false,
-        noWrap: true,
-        attribution: tilesBase && !tilesBase.startsWith('legacy:')
-          ? 'Map tiles: <a href="https://webmap.affectedarc07.co.uk" target="_blank">SS13WebMap by AffectedArc07</a>'
-          : ''
-      }).addTo(map);
+      if (imageBase) {
+        // affectedarc07 webmap: single flat PNG per z-level
+        var url = imageBase + '-' + z + '.png';
+        tileLayer = L.imageOverlay(url, imgBounds, {
+          attribution: '<a href="https://webmap.affectedarc07.co.uk" target="_blank">SS13WebMap by AffectedArc07</a>'
+        }).addTo(map);
+      } else if (data.map_url) {
+        // Legacy renderbus tile fallback
+        tileLayer = L.tileLayer(
+          'https://renderbus.s3.amazonaws.com/tiles/' + data.map_url + '/{z}/tile_{x}-{y}.png',
+          { minZoom: 1, maxZoom: 6, maxNativeZoom: 5, continuousWorld: true }
+        ).addTo(map);
+      }
 
       // Update sidebar button states
       document.querySelectorAll('.zlevel-btn').forEach(function(btn) {
