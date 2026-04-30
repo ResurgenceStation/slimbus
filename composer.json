@@ -17,12 +17,16 @@
         "kevinrob/guzzle-cache-middleware": "^3.2",
         "league/flysystem": "^1.0",
         "doctrine/cache": "^1.7",
-        "slim/csrf": "^0.8",
-        "twig/extensions": "*"
+        "slim/csrf": "^0.8"
     },
     "autoload": {
         "psr-4": {
             "Statbus\\": "src/Statbus/"
+        }
+    },
+    "config": {
+        "audit": {
+            "block-insecure": false
         }
     }
 }
