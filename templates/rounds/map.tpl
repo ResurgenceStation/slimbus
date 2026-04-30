@@ -47,20 +47,28 @@ fetch('/rounds/' + roundID + '?format=json')
   .then(function(data) {
 
     // ── Webmap config ─────────────────────────────────────────────────────────
-    let imageBase = null;  // e.g. "https://mocha.affectedarc07.co.uk/webmap/hippie/hippiestation/hippiestation"
+    // tiles: base URL to the self-hosted XYZ tile pyramid served by Caddy.
+    //   Tile URL pattern: {tilesBase}/{z_level}/{zoom}/{x}/{y}.png
+    //   e.g.  https://webmap.owo.fm/hippiestation/2/4/3/5.png
+    let tilesBase = null;
     let zLevels   = [2];
     let zNames    = ['Station'];
 
-    if (data.webmap && data.webmap.image_base) {
-      imageBase = data.webmap.image_base;
-      if (data.webmap.main_z)   activeZ  = data.webmap.main_z;
-      if (data.webmap.z_levels) zLevels  = data.webmap.z_levels;
-      if (data.webmap.z_names)  zNames   = data.webmap.z_names;
+    if (data.webmap) {
+      if (data.webmap.tiles)    tilesBase = data.webmap.tiles;
+      if (data.webmap.main_z)   activeZ   = data.webmap.main_z;
+      if (data.webmap.z_levels) zLevels   = data.webmap.z_levels;
+      if (data.webmap.z_names)  zNames    = data.webmap.z_names;
     }
 
-    // Map bounds in Leaflet CRS.Simple matching tg2leaf coordinate system
-    // tg2leaf(x,y) = [y-255, x], so bottom-left=(1,1)→[-254,1], top-right=(255,255)→[0,255]
-    var imgBounds = [[-255, 0], [0, 255]];
+    // Leaflet CRS.Simple tile coordinate system:
+    //   bounds [[-256,0],[0,256]] — one 256-unit square.
+    //   At zoom Z there are 2^Z × 2^Z tiles of 256 px each.
+    //   Tile (0,0) = top-left (north-west = high BYOND Y, low BYOND X).
+    //   tg2leaf(x,y) → [y-255, x]  so the top-left corner is [-255, 0]
+    //   and the bottom-right is [0, 255].  We pad the bounds by 1 unit so
+    //   tile edges exactly align with the map boundary.
+    var tileBounds = [[-256, 0], [0, 256]];
 
     // ── Leaflet map init ──────────────────────────────────────────────────────
     map = L.map("map", {
@@ -75,11 +83,18 @@ fetch('/rounds/' + roundID + '?format=json')
     function switchTileLayer(z) {
       activeZ = z;
       if (tileLayer) map.removeLayer(tileLayer);
-      if (imageBase) {
-        // affectedarc07 webmap: single flat PNG per z-level
-        var url = imageBase + '-' + z + '.png';
-        tileLayer = L.imageOverlay(url, imgBounds, {
-          attribution: '<a href="https://webmap.affectedarc07.co.uk" target="_blank">SS13WebMap by AffectedArc07</a>'
+      if (tilesBase) {
+        // Self-hosted XYZ tiles rendered by dmm-tools + tile.py
+        // URL: {tilesBase}/{z_level}/{zoom}/{x}/{y}.png
+        tileLayer = L.tileLayer(tilesBase + '/' + z + '/{z}/{x}/{y}.png', {
+          tileSize: 256,
+          minZoom: 0,
+          maxZoom: 7,
+          maxNativeZoom: 5,   // tiles rendered up to zoom 5; zoom 6-7 upscales
+          tms: false,          // y=0 is north (top), matching our tile.py output
+          bounds: tileBounds,
+          noWrap: true,
+          attribution: 'Map tiles: HippieStation (self-hosted)'
         }).addTo(map);
       } else if (data.map_url) {
         // Legacy renderbus tile fallback
