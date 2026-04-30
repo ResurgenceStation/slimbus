@@ -72,6 +72,19 @@ class Round {
       $round->admin_logs_dir = str_replace($round->server_data->public_logs, $round->server_data->raw_logs, $round->remote_logs_dir);
     }
 
+    // Local filesystem logs (self-hosted — reads directly from mounted game_data volume)
+    if(isset($round->server_data->local_logs) && $round->initialize_datetime){
+      $round->logs = TRUE;
+      $date = new \DateTime($round->initialize_datetime);
+      $year  = $date->format('Y');
+      $month = $date->format('m');
+      $day   = $date->format('d');
+      $round->log_dir = $round->server_data->local_logs . "$year/$month/$day/round-$round->id/";
+      if(isset($round->server_data->public_logs_url)){
+        $round->remote_logs_dir = $round->server_data->public_logs_url . "$year/$month/$day/round-$round->id/";
+      }
+    }
+
     $round->map_url = str_replace(' ', '', $round->map);
     return $round;
   }

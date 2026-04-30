@@ -10,6 +10,8 @@ use GuzzleHttp\Exception\ClientException as GCeption;
 class LogsController Extends Controller {
 
   private $hash;
+  private $zip;
+  private $log_dir;
   private $round;
   private $hasLogs = false;
   private $file;
@@ -20,10 +22,18 @@ class LogsController Extends Controller {
     parent::__construct($container);
     $settings = $this->container->get('settings');
     $this->round = $round;
-    $this->hash = hash('sha256', $this->round->remote_logs);
-    $this->zip = ROOTDIR."/tmp/logs/$this->hash.zip";
-    $this->hasLogs = $this->ensureLocalLogs();
     $this->alt_db = (new DBController($settings['database']['alt']))->db;
+
+    if(isset($round->log_dir)){
+      // Local filesystem path (game_data volume mounted into container)
+      $this->log_dir = $round->log_dir;
+      $this->hasLogs = is_dir($this->log_dir);
+    } elseif(isset($round->remote_logs)){
+      // Legacy: download ZIP from remote URL and cache locally
+      $this->hash = hash('sha256', $this->round->remote_logs);
+      $this->zip = ROOTDIR."/tmp/logs/$this->hash.zip";
+      $this->hasLogs = $this->ensureLocalLogs();
+    }
   }
 
   private function ensureLocalLogs(){
@@ -31,17 +41,17 @@ class LogsController Extends Controller {
       return true;
     }
     try{
-    $client = new \GuzzleHttp\Client();
-    $res = $client->request('GET',$this->round->remote_logs,[
-      'headers' => ['Accept-Encoding' => 'gzip'],
-      'curl' => [
-          CURLOPT_FOLLOWLOCATION => TRUE,
-          CURLOPT_REFERER => "atlantaned.space",
-        ]
-      ]);
+      $client = new \GuzzleHttp\Client();
+      $res = $client->request('GET',$this->round->remote_logs,[
+        'headers' => ['Accept-Encoding' => 'gzip'],
+        'curl' => [
+            CURLOPT_FOLLOWLOCATION => TRUE,
+            CURLOPT_REFERER => "atlantaned.space",
+          ]
+        ]);
     } catch (GCeption $e){
       return false;
-    } 
+    }
     $logs = $res->getBody()->getContents();
     if(!$logs){
       return false;
@@ -50,13 +60,55 @@ class LogsController Extends Controller {
       $handle = fopen($this->zip, 'w');
       fwrite($handle, $logs);
       fclose($handle);
-    } catch(Excention $e){
+    } catch(\Exception $e){
       die($e->getMessage());
     }
     return true;
   }
 
+  private function readFileContent($filename){
+    if($this->log_dir){
+      $path = $this->log_dir . $filename;
+      return file_exists($path) ? file_get_contents($path) : null;
+    }
+    if($this->zip){
+      $path = "phar://" . $this->zip . '/' . $filename;
+      return file_exists($path) ? file_get_contents($path) : null;
+    }
+    return null;
+  }
+
+  private function openFileHandle($filename){
+    if($this->log_dir){
+      $path = $this->log_dir . $filename;
+      return file_exists($path) ? fopen($path, 'r') : false;
+    }
+    if($this->zip){
+      $path = "phar://" . $this->zip . '/' . $filename;
+      return file_exists($path) ? fopen($path, 'r') : false;
+    }
+    return false;
+  }
+
   public function listing(){
+    if(!$this->hasLogs) return false;
+    $allowed = [
+      'atmos.html', 'cargo.html', 'gravity.html', 'hallucinations.html',
+      'initialize.txt', 'manifest.txt', 'newscaster.json', 'pda.txt',
+      'portals.html', 'profiler.json', 'qdel.txt', 'radiation.html',
+      'records.html', 'research.html', 'round_end_data.json', 'runtime.txt',
+      'singulo.html', 'telecomms.txt', 'supermatter.html', 'wires.html',
+      'game.txt', 'attack.txt',
+    ];
+    if($this->log_dir){
+      foreach($allowed as $filename){
+        if(file_exists($this->log_dir . $filename)){
+          $this->listing[$filename] = new \SplFileInfo($this->log_dir . $filename);
+        }
+      }
+      return $this->listing;
+    }
+    // Legacy ZIP listing
     $files = new \RecursiveDirectoryIterator("phar://".$this->zip);
     foreach ($files as $name => $file){
       if (!$file->isFile()) continue;
@@ -65,6 +117,7 @@ class LogsController Extends Controller {
     }
     return $this->listing;
   }
+
   public function getFile($file, $format = false){
     if (!in_array($file, [
       'atmos.html',
@@ -92,9 +145,7 @@ class LogsController Extends Controller {
     ])) {
       return false;
     }
-    if(file_exists("phar://".$this->zip.'/'.$file)){
-      $this->file = file_get_contents("phar://".$this->zip."/".$file);
-    }
+    $this->file = $this->readFileContent($file);
     if(in_array($file,[
       'newscaster.json'
     ])){
@@ -252,7 +303,8 @@ class LogsController Extends Controller {
           $v['id'] = substr(sha1($v['body'].$v['time stamp']),0,7);
           $v['body'] = filter_var($v['body'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_NO_ENCODE_QUOTES);
           if('' != $v['photo file']){
-            $v['photo file'] = base64_encode(file_get_contents("phar://".$this->zip."/photos/".$v['photo file'].".png"));
+            $photoContent = $this->readFileContent("photos/" . $v['photo file'] . ".png");
+          if($photoContent) $v['photo file'] = base64_encode($photoContent);
           }
          }
       }
@@ -328,7 +380,7 @@ class LogsController Extends Controller {
 
   public function processGameLogs(){
     $i = 0;
-    $handle = fopen("phar://".$this->zip."/game.txt", "r");
+    $handle = $this->openFileHandle("game.txt");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
           $tmp = [];
@@ -378,7 +430,7 @@ class LogsController Extends Controller {
       fclose($handle);
     }
 
-    $handle = fopen("phar://".$this->zip."/attack.txt", "r");
+    $handle = $this->openFileHandle("attack.txt");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
           $tmp = [];
