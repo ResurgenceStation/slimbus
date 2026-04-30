@@ -38,20 +38,79 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 let roundID = window.location.pathname.split('/')[2];
-let activeZ = 2;      // default z-level shown on the map
+let activeZ  = 1;
 let tileLayer = null;
 let map = null;
+
+// ── Raw data stores (populated on first fetch, re-used on z-level switch) ──
+let deathsData  = null;   // array of death objects
+let bombsData   = null;   // array of explosion objects
+let logRawData  = {};     // filename → array of log line objects
+
+// ── Overlay layer groups ───────────────────────────────────────────────────
+var corpses   = L.layerGroup();
+var bombs     = L.layerGroup();
+var logLayers = {};       // filename → L.layerGroup
+
+// ── Render helpers — clear and repopulate a layer for the current activeZ ──
+function renderDeaths() {
+  corpses.clearLayers();
+  if (!deathsData) return;
+  deathsData.forEach(function(d) {
+    if (parseInt(d.z) !== activeZ) return;
+    L.polygon([
+      tg2leaf(d.x,   d.y),
+      tg2leaf(d.x-1, d.y),
+      tg2leaf(d.x-1, d.y-1),
+      tg2leaf(d.x,   d.y-1)
+    ], {color: 'red'})
+      .bindPopup(
+        "<table class='table table-sm table-bordered'>"
+        + "<tr><th>Name</th><td>" + d.name + " / " + d.byondkey + "</td></tr>"
+        + "<tr><th>Job</th><td>"  + d.job  + "</td></tr>"
+        + "<tr><th>At</th><td>"   + d.pod  + "</td></tr>"
+        + "<tr><th>Time</th><td>" + d.tod  + "</td></tr>"
+        + "</table>"
+      )
+      .addTo(corpses);
+  });
+}
+
+function renderBombs() {
+  bombs.clearLayers();
+  if (!bombsData) return;
+  bombsData.forEach(function(e) {
+    if (String(e.z) !== String(activeZ)) return;
+    if (e.flash > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'white', radius:+e.flash+.5}).bindPopup("Flash: " + e.flash + " at " + e.area).addTo(bombs);
+    if (e.light > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'yellow',radius:+e.light+.5}).bindPopup("Light: " + e.light + " at " + e.area).addTo(bombs);
+    if (e.heavy > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'orange',radius:+e.heavy+.5}).bindPopup("Heavy: " + e.heavy + " at " + e.area).addTo(bombs);
+    if (e.dev   > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'red',   radius:+e.dev  +.5}).bindPopup("Dev: "   + e.dev   + " at " + e.area).addTo(bombs);
+  });
+}
+
+function renderLogLayer(filename) {
+  if (!logLayers[filename] || !logRawData[filename]) return;
+  logLayers[filename].clearLayers();
+  logRawData[filename].forEach(function(line) {
+    if (parseInt(line.z) !== activeZ) return;
+    L.polygon([
+      tg2leaf(line.x,   line.y),
+      tg2leaf(line.x-1, line.y),
+      tg2leaf(line.x-1, line.y-1),
+      tg2leaf(line.x,   line.y-1)
+    ], {color: '#' + line.color})
+      .bindPopup(line.text)
+      .addTo(logLayers[filename]);
+  });
+}
 
 fetch('/rounds/' + roundID + '?format=json')
   .then(r => r.json())
   .then(function(data) {
 
     // ── Webmap config ─────────────────────────────────────────────────────────
-    // tiles: base URL to the self-hosted XYZ tile pyramid served by Caddy.
-    //   Tile URL pattern: {tilesBase}/{z_level}/{zoom}/{x}/{y}.png
-    //   e.g.  https://webmap.owo.fm/hippiestation/2/4/3/5.png
     let tilesBase = null;
-    let zLevels   = [2];
+    let zLevels   = [1];
     let zNames    = ['Station'];
 
     if (data.webmap) {
@@ -61,13 +120,7 @@ fetch('/rounds/' + roundID + '?format=json')
       if (data.webmap.z_names)  zNames    = data.webmap.z_names;
     }
 
-    // Leaflet CRS.Simple tile coordinate system:
-    //   bounds [[-256,0],[0,256]] — one 256-unit square.
-    //   At zoom Z there are 2^Z × 2^Z tiles of 256 px each.
-    //   Tile (0,0) = top-left (north-west = high BYOND Y, low BYOND X).
-    //   tg2leaf(x,y) → [y-255, x]  so the top-left corner is [-255, 0]
-    //   and the bottom-right is [0, 255].  We pad the bounds by 1 unit so
-    //   tile edges exactly align with the map boundary.
+    // Bounds match our tile pyramid: [[-256,0],[0,256]] covers the 255×255 map.
     var tileBounds = [[-256, 0], [0, 256]];
 
     // ── Leaflet map init ──────────────────────────────────────────────────────
@@ -82,27 +135,33 @@ fetch('/rounds/' + roundID + '?format=json')
 
     function switchTileLayer(z) {
       activeZ = z;
+
+      // Swap base tile layer
       if (tileLayer) map.removeLayer(tileLayer);
       if (tilesBase) {
-        // Self-hosted XYZ tiles rendered by dmm-tools + tile.py
-        // URL: {tilesBase}/{z_level}/{zoom}/{x}/{y}.png
         tileLayer = L.tileLayer(tilesBase + '/' + z + '/{z}/{x}/{y}.png', {
           tileSize: 256,
           minZoom: 0,
           maxZoom: 7,
-          maxNativeZoom: 5,   // tiles rendered up to zoom 5; zoom 6-7 upscales
-          tms: false,          // y=0 is north (top), matching our tile.py output
+          maxNativeZoom: 5,
+          tms: false,
           bounds: tileBounds,
           noWrap: true,
           attribution: 'Map tiles: HippieStation (self-hosted)'
         }).addTo(map);
       } else if (data.map_url) {
-        // Legacy renderbus tile fallback
         tileLayer = L.tileLayer(
           'https://renderbus.s3.amazonaws.com/tiles/' + data.map_url + '/{z}/tile_{x}-{y}.png',
           { minZoom: 1, maxZoom: 6, maxNativeZoom: 5, continuousWorld: true }
         ).addTo(map);
       }
+
+      // Re-render overlays for new z-level (only if their data is loaded)
+      if (deathsData && map.hasLayer(corpses)) renderDeaths();
+      if (bombsData  && map.hasLayer(bombs))   renderBombs();
+      Object.keys(logRawData).forEach(function(filename) {
+        if (map.hasLayer(logLayers[filename])) renderLogLayer(filename);
+      });
 
       // Update sidebar button states
       document.querySelectorAll('.zlevel-btn').forEach(function(btn) {
@@ -127,7 +186,6 @@ fetch('/rounds/' + roundID + '?format=json')
       switchTileLayer(parseInt(btn.dataset.z));
     });
 
-    // Load default z-level
     switchTileLayer(activeZ);
 
     if (data.deaths) {
@@ -141,15 +199,13 @@ fetch('/rounds/' + roundID + '?format=json')
     // ── Log file overlays ─────────────────────────────────────────────────────
     fetch('/rounds/' + roundID + '/logs?format=json')
       .then(r => r.json())
-      .then(function(logData) {
-        let logLayers = {};
-        // Keys are plain filenames (local mode) or legacy "path.zip/filename" strings
-        Object.keys(logData).forEach(function(key) {
+      .then(function(logIndex) {
+        Object.keys(logIndex).forEach(function(key) {
           let filename = key.includes('.zip/') ? key.split('.zip/')[1] : key;
-          let html = "<li class='nav-item'><a href='" + filename + "' class='nav-link logfileLink'>" + filename + "</a></li>";
-          document.getElementById('logfiles').insertAdjacentHTML('beforeend', html);
+          document.getElementById('logfiles').insertAdjacentHTML('beforeend',
+            "<li class='nav-item'><a href='" + filename + "' class='nav-link logfileLink'>"
+            + filename + "</a></li>");
           logLayers[filename] = L.layerGroup();
-          logLayers[filename]['loaded'] = false;
         });
 
         document.body.addEventListener('click', function(e) {
@@ -159,93 +215,65 @@ fetch('/rounds/' + roundID + '?format=json')
           link.classList.toggle('active');
           let file = link.getAttribute('href');
           if (!logLayers[file]) return;
-          if (logLayers[file]['loaded']) {
+
+          // Data already fetched — just toggle visibility
+          if (logRawData[file]) {
             if (map.hasLayer(logLayers[file])) {
               map.removeLayer(logLayers[file]);
             } else {
+              renderLogLayer(file);   // re-render for current z before showing
               map.addLayer(logLayers[file]);
             }
             return;
           }
+
+          // First load: fetch then render for current z
           fetch('/rounds/' + roundID + '/logs/' + file + '/json')
             .then(r => r.json())
             .then(function(lines) {
-              lines.forEach(function(line) {
-                if (parseInt(line.z) !== activeZ) return;
-                L.polygon([
-                  tg2leaf(line.x,   line.y),
-                  tg2leaf(line.x-1, line.y),
-                  tg2leaf(line.x-1, line.y-1),
-                  tg2leaf(line.x,   line.y-1)
-                ], {color: '#' + line.color})
-                  .bindPopup(line.text)
-                  .addTo(logLayers[file]);
-              });
-              logLayers[file]['loaded'] = true;
-              logLayers[file].addTo(map);
+              logRawData[file] = lines;
+              renderLogLayer(file);
+              map.addLayer(logLayers[file]);
             });
         });
       });
 
     // ── Deaths overlay ────────────────────────────────────────────────────────
-    var corpses = L.layerGroup();
-    var corpsesLoaded = false;
     document.getElementById('deaths').addEventListener('click', function(e) {
       e.preventDefault();
       this.classList.toggle('active');
-      if (corpsesLoaded) {
+
+      if (deathsData) {
         if (map.hasLayer(corpses)) { map.removeLayer(corpses); } else { map.addLayer(corpses); }
         return;
       }
-      corpsesLoaded = true;
+
       fetch('/deaths/round/' + roundID + '?format=json')
         .then(r => r.json())
         .then(function(deaths) {
-          deaths.forEach(function(d) {
-            if (parseInt(d.z) !== activeZ) return;
-            L.polygon([
-              tg2leaf(d.x,   d.y),
-              tg2leaf(d.x-1, d.y),
-              tg2leaf(d.x-1, d.y-1),
-              tg2leaf(d.x,   d.y-1)
-            ], {color: 'red'})
-              .bindPopup(
-                "<table class='table table-sm table-bordered'>"
-                + "<tr><th>Name</th><td>" + d.name + " / " + d.byondkey + "</td></tr>"
-                + "<tr><th>Job</th><td>" + d.job + "</td></tr>"
-                + "<tr><th>At</th><td>" + d.pod + "</td></tr>"
-                + "<tr><th>Time</th><td>" + d.tod + "</td></tr>"
-                + "</table>"
-              )
-              .addTo(corpses);
-          });
+          deathsData = deaths;
+          renderDeaths();
+          corpses.addTo(map);
         });
-      corpses.addTo(map);
     });
 
     // ── Explosions overlay ────────────────────────────────────────────────────
-    var bombs = L.layerGroup();
-    var bombsLoaded = false;
     document.getElementById('bombs').addEventListener('click', function(e) {
       e.preventDefault();
       this.classList.toggle('active');
-      if (bombsLoaded) {
+
+      if (bombsData) {
         if (map.hasLayer(bombs)) { map.removeLayer(bombs); } else { map.addLayer(bombs); }
         return;
       }
-      bombsLoaded = true;
+
       fetch('/rounds/' + roundID + '/explosion?format=json')
         .then(r => r.json())
         .then(function(result) {
-          Object.values(result.data || result).forEach(function(e) {
-            if (String(e.z) !== String(activeZ)) return;
-            if (e.flash > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'white', radius:+e.flash+.5}).bindPopup("Flash: " + e.flash + " at " + e.area).addTo(bombs);
-            if (e.light > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'yellow',radius:+e.light+.5}).bindPopup("Light: " + e.light + " at " + e.area).addTo(bombs);
-            if (e.heavy > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'orange',radius:+e.heavy+.5}).bindPopup("Heavy: " + e.heavy + " at " + e.area).addTo(bombs);
-            if (e.dev   > 0) L.circle(tg2leaf(e.x-.5, e.y-.5), {color:'red',   radius:+e.dev  +.5}).bindPopup("Dev: "   + e.dev   + " at " + e.area).addTo(bombs);
-          });
+          bombsData = Object.values(result.data || result);
+          renderBombs();
+          bombs.addTo(map);
         });
-      bombs.addTo(map);
     });
   });
 </script>
