@@ -86,6 +86,12 @@ class Round {
     }
 
     $round->map_url = str_replace(' ', '', $round->map);
+
+    // Webmap tile config — passed through to the JS map view
+    if(isset($round->server_data->webmap)){
+      $round->webmap = $round->server_data->webmap;
+    }
+
     return $round;
   }
 
