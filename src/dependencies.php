@@ -41,10 +41,10 @@ $container['view'] = function ($container) {
 
   $view->addExtension(new Statbus\Extensions\CsrfExtension($container->get('csrf')));
 
-  $view->addExtension(new \Twig_Extension_Debug());
+  $view->addExtension(new \Twig\Extension\DebugExtension());
 
   //Fancy timestamp filter
-  $twigTimestampFilter = new \Twig_Filter('timestamp', function ($string) {
+  $twigTimestampFilter = new \Twig\TwigFilter('timestamp', function ($string) {
     $string = date('Y-m-d H:i:s', strtotime($string));
     $return = "<span class='timestamp'>";
     $return.= "<time datetime='$string' title='$string' ";
@@ -54,7 +54,7 @@ $container['view'] = function ($container) {
   $view->getEnvironment()->addFilter($twigTimestampFilter);
 
   //My censored filter that I <3
-  $twigCensorFilter = new \Twig_Filter('censor', function ($string) {
+  $twigCensorFilter = new \Twig\TwigFilter('censor', function ($string) {
     $string = strip_tags($string);
     return preg_replace("/\S/", '█', $string);
   });

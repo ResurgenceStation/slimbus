@@ -2,7 +2,7 @@
 
 namespace Statbus\Extensions;
 
-class CsrfExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
+class CsrfExtension extends \Twig\Extension\AbstractExtension implements \Twig\Extension\GlobalsInterface
 {
 
     /**
