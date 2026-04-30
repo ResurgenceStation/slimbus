@@ -193,12 +193,19 @@ fetch('/rounds/' + roundID + '?format=json')
 
     switchTileLayer(activeZ);
 
+    console.log('[MAP] round data:', {deaths: data.deaths, stats: data.stats, webmap: data.webmap});
+    console.log('[MAP] activeZ=', activeZ, 'activeGameZ=', activeGameZ, 'gameZMap=', gameZMap);
+
     if (data.deaths) {
       document.getElementById('deaths').classList.remove('invisible');
       document.getElementById('deathCount').textContent = data.deaths;
+    } else {
+      console.warn('[MAP] Deaths button hidden: data.deaths =', data.deaths);
     }
     if (data.stats && ('explosion' in data.stats)) {
       document.getElementById('bombs').classList.remove('invisible');
+    } else {
+      console.warn('[MAP] Bombs button hidden: data.stats =', JSON.stringify(data.stats));
     }
 
     // ── Log file overlays ─────────────────────────────────────────────────────
@@ -257,9 +264,14 @@ fetch('/rounds/' + roundID + '?format=json')
         .then(r => r.json())
         .then(function(deaths) {
           deathsData = deaths;
+          console.log('[MAP] deaths fetched:', deaths.length, 'records. Sample:', deaths[0]);
+          console.log('[MAP] filtering for activeGameZ=', activeGameZ);
+          var matched = deaths.filter(function(d){ return parseInt(d.z) === activeGameZ; });
+          console.log('[MAP]', matched.length, 'deaths match activeGameZ', activeGameZ);
           renderDeaths();
           corpses.addTo(map);
-        });
+        })
+        .catch(function(err){ console.error('[MAP] deaths fetch error:', err); });
     });
 
     // ── Explosions overlay ────────────────────────────────────────────────────
