@@ -150,9 +150,9 @@ class RoundController Extends Controller {
       MAX(prev.id) AS prev,
       COUNT(D.id) AS deaths
       FROM tbl_round
-      JOIN tbl_round AS next ON next.id = tbl_round.id + 1
-      JOIN tbl_round AS prev ON prev.id = tbl_round.id - 1 
-      JOIN tbl_death AS D ON D.round_id = tbl_round.id
+      LEFT JOIN tbl_round AS next ON next.id = tbl_round.id + 1
+      LEFT JOIN tbl_round AS prev ON prev.id = tbl_round.id - 1
+      LEFT JOIN tbl_death AS D ON D.round_id = tbl_round.id
       WHERE tbl_round.id = ?
       AND tbl_round.shutdown_datetime IS NOT NULL", $id);
     $round = $this->roundModel->parseRound($round);
@@ -181,7 +181,7 @@ class RoundController Extends Controller {
 
     $this->ogdata['url'] = $url;
     $this->ogdata['title'] = "Log listing for round #$round->id on $round->server";
-    $this->ogdata['description'] = (($logs) ? count($logs) : 0)." log files available";
+    $this->ogdata['description'] = (is_array($logs) ? count($logs) : 0)." log files available";
 
     return $this->view->render($response, 'rounds/logs.tpl',[
       'round'       => $round,
@@ -215,7 +215,7 @@ class RoundController Extends Controller {
 
     $this->ogdata['url'] = $url;
     $this->ogdata['title'] = "$file logfile for Round #$round->id on $round->server";
-    $this->ogdata['description'] = (($logs) ? count($logs) : 0)." lines found in $file.";
+    $this->ogdata['description'] = (is_array($logs) ? count($logs) : 0)." lines found in $file.";
     if(!$logs){
       return $this->view->render($response, 'base/error.tpl',[
         'code'    => 404,
@@ -234,7 +234,7 @@ class RoundController Extends Controller {
   }
 
   public function getGameLogs($request, $response, $args){
-    $file = 'game.txt';
+    $file = 'game.log';
     $round = $this->getRound($args['id']);
     if(isset($args['page'])) {
       $this->page = filter_var($args['page'], FILTER_VALIDATE_INT);
@@ -244,7 +244,7 @@ class RoundController Extends Controller {
     $logs = (new LogsController($this->container, $round))->getGameLogs($this->page);
     $round->pages = (new LogsController($this->container, $round))->getPages();
 
-    if(!$logs){
+    if($logs === false){
       return $this->view->render($response, 'base/error.tpl',[
         'message'  => "Alt DB not configured. No parsed logs available",
         'code'     => 500,

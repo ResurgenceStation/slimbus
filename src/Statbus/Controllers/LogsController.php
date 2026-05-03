@@ -10,6 +10,8 @@ use GuzzleHttp\Exception\ClientException as GCeption;
 class LogsController Extends Controller {
 
   private $hash;
+  private $zip;
+  private $log_dir;
   private $round;
   private $hasLogs = false;
   private $file;
@@ -20,10 +22,18 @@ class LogsController Extends Controller {
     parent::__construct($container);
     $settings = $this->container->get('settings');
     $this->round = $round;
-    $this->hash = hash('sha256', $this->round->remote_logs);
-    $this->zip = ROOTDIR."/tmp/logs/$this->hash.zip";
-    $this->hasLogs = $this->ensureLocalLogs();
     $this->alt_db = (new DBController($settings['database']['alt']))->db;
+
+    if(isset($round->log_dir)){
+      // Local filesystem path (game_data volume mounted into container)
+      $this->log_dir = $round->log_dir;
+      $this->hasLogs = is_dir($this->log_dir);
+    } elseif(isset($round->remote_logs)){
+      // Legacy: download ZIP from remote URL and cache locally
+      $this->hash = hash('sha256', $this->round->remote_logs);
+      $this->zip = ROOTDIR."/tmp/logs/$this->hash.zip";
+      $this->hasLogs = $this->ensureLocalLogs();
+    }
   }
 
   private function ensureLocalLogs(){
@@ -31,17 +41,17 @@ class LogsController Extends Controller {
       return true;
     }
     try{
-    $client = new \GuzzleHttp\Client();
-    $res = $client->request('GET',$this->round->remote_logs,[
-      'headers' => ['Accept-Encoding' => 'gzip'],
-      'curl' => [
-          CURLOPT_FOLLOWLOCATION => TRUE,
-          CURLOPT_REFERER => "atlantaned.space",
-        ]
-      ]);
+      $client = new \GuzzleHttp\Client();
+      $res = $client->request('GET',$this->round->remote_logs,[
+        'headers' => ['Accept-Encoding' => 'gzip'],
+        'curl' => [
+            CURLOPT_FOLLOWLOCATION => TRUE,
+            CURLOPT_REFERER => "atlantaned.space",
+          ]
+        ]);
     } catch (GCeption $e){
       return false;
-    } 
+    }
     $logs = $res->getBody()->getContents();
     if(!$logs){
       return false;
@@ -50,13 +60,64 @@ class LogsController Extends Controller {
       $handle = fopen($this->zip, 'w');
       fwrite($handle, $logs);
       fclose($handle);
-    } catch(Excention $e){
+    } catch(\Exception $e){
       die($e->getMessage());
     }
     return true;
   }
 
+  private function readFileContent($filename){
+    if($this->log_dir){
+      $path = $this->log_dir . $filename;
+      return file_exists($path) ? file_get_contents($path) : null;
+    }
+    if($this->zip){
+      $path = "phar://" . $this->zip . '/' . $filename;
+      return file_exists($path) ? file_get_contents($path) : null;
+    }
+    return null;
+  }
+
+  private function openFileHandle($filename){
+    if($this->log_dir){
+      $path = $this->log_dir . $filename;
+      return file_exists($path) ? fopen($path, 'r') : false;
+    }
+    if($this->zip){
+      $path = "phar://" . $this->zip . '/' . $filename;
+      return file_exists($path) ? fopen($path, 'r') : false;
+    }
+    return false;
+  }
+
   public function listing(){
+    if(!$this->hasLogs) return false;
+    $allowed = [
+      // HTML investigate logs
+      'atmos.html', 'cargo.html', 'gravity.html', 'hallucinations.html',
+      'portals.html', 'radiation.html', 'records.html', 'research.html',
+      'singulo.html', 'supermatter.html', 'wires.html',
+      // JSON logs
+      'newscaster.json', 'round_end_data.json', 'profiler.json',
+      // .log variants (HippieStation / modern tg)
+      'game.log', 'attack.log', 'runtime.log', 'pda.log',
+      'manifest.log', 'telecomms.log', 'qdel.log', 'initialize.log',
+      'asset.log', 'hrefs.log', 'overlay.log', 'virus.log',
+      'sql.log', 'tgui.log', 'job_debug.log', 'map_errors.log',
+      'config_error.log',
+      // .txt variants (legacy tg)
+      'game.txt', 'attack.txt', 'runtime.txt', 'pda.txt',
+      'manifest.txt', 'telecomms.txt', 'qdel.txt', 'initialize.txt',
+    ];
+    if($this->log_dir){
+      foreach($allowed as $filename){
+        if(file_exists($this->log_dir . $filename)){
+          $this->listing[$filename] = new \SplFileInfo($this->log_dir . $filename);
+        }
+      }
+      return $this->listing;
+    }
+    // Legacy ZIP listing
     $files = new \RecursiveDirectoryIterator("phar://".$this->zip);
     foreach ($files as $name => $file){
       if (!$file->isFile()) continue;
@@ -65,36 +126,25 @@ class LogsController Extends Controller {
     }
     return $this->listing;
   }
+
   public function getFile($file, $format = false){
-    if (!in_array($file, [
-      'atmos.html',
-      // 'attack.txt',
-      'cargo.html',
-      // 'game.txt',
-      'gravity.html',
-      'hallucinations.html',
-      'initialize.txt',
-      'manifest.txt',
-      'newscaster.json',
-      'pda.txt',
-      'portals.html',
-      'profiler.json',
-      'qdel.txt',
-      'radiation.html',
-      'records.html',
-      'research.html',
-      'round_end_data.json',
-      'runtime.txt',
-      'singulo.html',
-      'telecomms.txt',
-      'supermatter.html',
-      'wires.html',
-    ])) {
+    $viewable = [
+      'atmos.html', 'cargo.html', 'gravity.html', 'hallucinations.html',
+      'portals.html', 'radiation.html', 'records.html', 'research.html',
+      'singulo.html', 'supermatter.html', 'wires.html',
+      'newscaster.json', 'round_end_data.json', 'profiler.json',
+      'game.log', 'attack.log', 'runtime.log', 'pda.log',
+      'manifest.log', 'telecomms.log', 'qdel.log', 'initialize.log',
+      'asset.log', 'hrefs.log', 'overlay.log', 'virus.log',
+      'sql.log', 'tgui.log', 'job_debug.log', 'map_errors.log',
+      'config_error.log',
+      'game.txt', 'attack.txt', 'runtime.txt', 'pda.txt',
+      'manifest.txt', 'telecomms.txt', 'qdel.txt', 'initialize.txt',
+    ];
+    if (!in_array($file, $viewable)) {
       return false;
     }
-    if(file_exists("phar://".$this->zip.'/'.$file)){
-      $this->file = file_get_contents("phar://".$this->zip."/".$file);
-    }
+    $this->file = $this->readFileContent($file);
     if(in_array($file,[
       'newscaster.json'
     ])){
@@ -252,7 +302,8 @@ class LogsController Extends Controller {
           $v['id'] = substr(sha1($v['body'].$v['time stamp']),0,7);
           $v['body'] = filter_var($v['body'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_NO_ENCODE_QUOTES);
           if('' != $v['photo file']){
-            $v['photo file'] = base64_encode(file_get_contents("phar://".$this->zip."/photos/".$v['photo file'].".png"));
+            $photoContent = $this->readFileContent("photos/" . $v['photo file'] . ".png");
+          if($photoContent) $v['photo file'] = base64_encode($photoContent);
           }
          }
       }
@@ -273,8 +324,8 @@ class LogsController Extends Controller {
           'role'       => $e['special'],
           'roundstart' => (int) $e['when']
         ]);
-      } catch (Exception $e){
-        var_dump($e->getMessage());
+      } catch (\Exception $e){
+        // skip duplicate manifest entry
       }
     }
   }
@@ -328,14 +379,19 @@ class LogsController Extends Controller {
 
   public function processGameLogs(){
     $i = 0;
-    $handle = fopen("phar://".$this->zip."/game.txt", "r");
+    $handle = $this->openFileHandle("game.log") ?: $this->openFileHandle("game.txt");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
           $tmp = [];
           $entry = [];
-          if(!preg_match("/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3})] (\w*): (.*)/", $line, $tmp)) continue;
+          // Match full datetime [YYYY-MM-DD HH:MM:SS.mmm] or time-only [HH:MM:SS.mmm]
+          if(!preg_match("/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[.,]\d+|\d{2}:\d{2}:\d{2}(?:[.,]\d+)?)] (\w+): (.*)/", $line, $tmp)) continue;
           $entry['type'] = $tmp[2];
-          $entry['time'] = $tmp[1];
+          $ts = $tmp[1];
+          if(strlen($ts) <= 15 && $this->log_dir && preg_match('#(\d{4})/(\d{2})/(\d{2})#', $this->log_dir, $dm)){
+            $ts = $dm[1].'-'.$dm[2].'-'.$dm[3].' '.$ts;
+          }
+          $entry['time'] = $ts;
           $entry['text'] = $tmp[3];
           $entry['x']    = null;
           $entry['y']    = null;
@@ -362,7 +418,7 @@ class LogsController Extends Controller {
               $this->alt_db->insert('round_logs',[
               'round'     => $this->round->id,
               'timestamp' => $entry['time'],
-              'type'      => $entry['type'],
+              'type'      => substr($entry['type'], 0, 16),
               'text'      => filter_var($entry['text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS,FILTER_FLAG_NO_ENCODE_QUOTES),
               'x'         => $entry['x'],
               'y'         => $entry['y'],
@@ -370,22 +426,27 @@ class LogsController Extends Controller {
               'area'      => filter_var($entry['area'],FILTER_SANITIZE_FULL_SPECIAL_CHARS,FILTER_FLAG_NO_ENCODE_QUOTES)
             ]);
               $i++;
-            } catch (Exception $e){
-              echo $e->getMessage();
+            } catch (\Exception $e){
+              // skip malformed line
             }
           }
         }
       fclose($handle);
     }
 
-    $handle = fopen("phar://".$this->zip."/attack.txt", "r");
+    $handle = $this->openFileHandle("attack.log") ?: $this->openFileHandle("attack.txt");
     if ($handle) {
         while (($line = fgets($handle)) !== false) {
           $tmp = [];
           $entry = [];
-          if(!preg_match("/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3})] (\w*): (.*)/", $line, $tmp)) continue;
+          // Match full datetime [YYYY-MM-DD HH:MM:SS.mmm] or time-only [HH:MM:SS.mmm]
+          if(!preg_match("/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[.,]\d+|\d{2}:\d{2}:\d{2}(?:[.,]\d+)?)] (\w+): (.*)/", $line, $tmp)) continue;
           $entry['type'] = $tmp[2];
-          $entry['time'] = $tmp[1];
+          $ts = $tmp[1];
+          if(strlen($ts) <= 15 && $this->log_dir && preg_match('#(\d{4})/(\d{2})/(\d{2})#', $this->log_dir, $dm)){
+            $ts = $dm[1].'-'.$dm[2].'-'.$dm[3].' '.$ts;
+          }
+          $entry['time'] = $ts;
           $entry['text'] = $tmp[3];
           $entry['x']    = null;
           $entry['y']    = null;
@@ -400,13 +461,12 @@ class LogsController Extends Controller {
               $entry['y']    = $t[4];
               $entry['z']    = $t[5];
               $entry['area'] = $t[2];
-              // var_dump($merge);
             }
             try{
               $this->alt_db->insert('round_logs',[
               'round'     => $this->round->id,
               'timestamp' => $entry['time'],
-              'type'      => $entry['type'],
+              'type'      => substr($entry['type'], 0, 16),
               'text'      => filter_var($entry['text'], FILTER_SANITIZE_FULL_SPECIAL_CHARS,FILTER_FLAG_NO_ENCODE_QUOTES),
               'x'         => $entry['x'],
               'y'         => $entry['y'],
@@ -414,8 +474,8 @@ class LogsController Extends Controller {
               'area'      => filter_var($entry['area'], FILTER_SANITIZE_FULL_SPECIAL_CHARS,FILTER_FLAG_NO_ENCODE_QUOTES)
             ]);
               $i++;
-            } catch (Exception $e){
-              echo $e->getMessage();
+            } catch (\Exception $e){
+              // skip malformed line
             }
           }
         }

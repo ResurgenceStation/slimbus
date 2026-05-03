@@ -2,7 +2,7 @@
 
 namespace Statbus\Extensions;
 
-class CsrfExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
+class CsrfExtension extends \Twig\Extension\AbstractExtension implements \Twig\Extension\GlobalsInterface
 {
 
     /**
@@ -15,7 +15,7 @@ class CsrfExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         $this->csrf = $csrf;
     }
 
-    public function getGlobals()
+    public function getGlobals(): array
     {
         // CSRF token name and value
         $csrfNameKey = $this->csrf->getTokenNameKey();
