@@ -27,8 +27,18 @@ class StatbusController extends Controller {
   public function getBigNumbers(){
     $numbers = new \stdclass;
     $numbers->playtime = number_format($this->DB->row("SELECT sum(tbl_role_time.minutes) AS minutes FROM tbl_role_time WHERE tbl_role_time.job = 'Living';")->minutes);
-    $numbers->deaths = number_format($this->DB->cell("SELECT count(id) as deaths FROM tbl_death;")+rand(-15,15));//fuzzed
-    $numbers->rounds = number_format($this->DB->cell("SELECT count(id) as rounds FROM tbl_round;"));
+    // Only count deaths and rounds from finished rounds. Active rounds have
+    // end_datetime IS NULL, so excluding them keeps the totals stable across
+    // a live round and avoids leaking partial information about the current one.
+    $numbers->deaths = number_format($this->DB->cell(
+      "SELECT count(d.id) AS deaths
+       FROM tbl_death d
+       JOIN tbl_round r ON d.round_id = r.id
+       WHERE r.end_datetime IS NOT NULL"
+    ));
+    $numbers->rounds = number_format($this->DB->cell(
+      "SELECT count(id) AS rounds FROM tbl_round WHERE end_datetime IS NOT NULL"
+    ));
     $numbers->books = number_format($this->DB->cell("SELECT count(tbl_library.id) FROM tbl_library WHERE tbl_library.content != ''
       AND (tbl_library.deleted IS NULL OR tbl_library.deleted = 0)"));
     return $numbers;
