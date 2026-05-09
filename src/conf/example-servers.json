@@ -3,6 +3,6 @@
     "port": 1234,
     "name": "Server Name",
     "raw_logs": "https://example.com/path_to_raw_logs",
-    "public_logs": "https://example.com/path_to_public_logs",
+    "public_logs": "https://example.com/path_to_public_logs"
   }
 ]
