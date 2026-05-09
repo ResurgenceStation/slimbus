@@ -181,7 +181,7 @@ class RoundController Extends Controller {
 
     $this->ogdata['url'] = $url;
     $this->ogdata['title'] = "Log listing for round #$round->id on $round->server";
-    $this->ogdata['description'] = (($logs) ? count($logs) : 0)." log files available";
+    $this->ogdata['description'] = (is_array($logs) ? count($logs) : 0)." log files available";
 
     return $this->view->render($response, 'rounds/logs.tpl',[
       'round'       => $round,
@@ -215,7 +215,7 @@ class RoundController Extends Controller {
 
     $this->ogdata['url'] = $url;
     $this->ogdata['title'] = "$file logfile for Round #$round->id on $round->server";
-    $this->ogdata['description'] = (($logs) ? count($logs) : 0)." lines found in $file.";
+    $this->ogdata['description'] = (is_array($logs) ? count($logs) : 0)." lines found in $file.";
     if(!$logs){
       return $this->view->render($response, 'base/error.tpl',[
         'code'    => 404,
