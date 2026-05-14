@@ -1,14 +1,16 @@
 {% extends "base/index.html"%}
 {% block pagetitle %}Round #{{round.id}}{% endblock %}
+{% block titlebar %}ROUND #{{round.id}}{% endblock %}
 {% block content %}
+
 {% if round.data.nuclear_challenge_mode %}
-<div class="alert alert-danger">
+<div class="pda-alert pda-alert--err">
   <strong>ALERT!</strong> WAR WERE DECLARED!
 </div>
 {% endif %}
 
 {% if round.userWasAntag %}
-<div class="alert alert-success">
+<div class="pda-alert pda-alert--ok">
   <strong>Hey, neat!</strong> Looks like you were an antagonist this round!
 </div>
 {% endif %}
@@ -17,26 +19,25 @@
 
 {% if round.data %}
   {% for name, stat in round.data %}
-  <div class="card mb-2" id="prs">
-    <div class="card-header">
+  <div class="pda-card" id="prs">
+    <div class="pda-card__title">
       <code>{{name}}</code>
     </div>
-    <div class="card-body">
-    {% include ['stats/single/' ~ stat.key_name ~'-' ~ stat.version ~'.tpl', 'stats/single/' ~ stat.key_name ~'.tpl','stats/type/' ~ stat.key_type ~'.tpl', 'stats/generic.tpl'] %}
-      </div>
+    <div class="pda-card__body">
+      {% include ['stats/single/' ~ stat.key_name ~'-' ~ stat.version ~'.tpl', 'stats/single/' ~ stat.key_name ~'.tpl','stats/type/' ~ stat.key_type ~'.tpl', 'stats/generic.tpl'] %}
     </div>
+  </div>
   {% endfor %}
 {% endif %}
 
 <h3>Round Stats</h3>
-<hr>
-<ul class="list-inline">
+<ul class="pda-stat-list">
   {% for key, stat in round.stats %}
-  <li class="list-inline-item">
-    <code>
-      <a href="{{path_for('round.single',{'id': round.id, 'stat':key})}}">{{key}}</a>
-    </code>
+  <li>
+    <a class="pda-link" href="{{path_for('round.single',{'id': round.id, 'stat':key})}}">
+      <code>{{key}}</code>
+    </a>
   </li>
-{% endfor %}
+  {% endfor %}
 </ul>
 {% endblock %}

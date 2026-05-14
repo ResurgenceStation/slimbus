@@ -785,6 +785,204 @@ body.pda-theme .pda-input--sm {
     max-width: 100%;
 }
 
+/* ---- round-family components (Stage 3 migration targets) ----
+ * Specialised layouts for the rounds/* templates. Built on the
+ * native pda-card / pda-table / pda-button primitives but with
+ * round-specific structure baked in.
+ */
+
+/* Round listing toolbar (top of rounds/listing.tpl): pagination on the
+ * left, page metadata on the right. Wraps on narrow viewports. */
+.pda-listing-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1em;
+    flex-wrap: wrap;
+    margin-bottom: 0.8em;
+}
+.pda-listing-toolbar__meta {
+    text-align: right;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+.pda-listing-toolbar__meta small { color: var(--pda-fg-muted); }
+
+/* Key/value-style pda-table: two label/value column pairs per row.
+ * Labels are right-aligned narrow columns, values are wider. The
+ * existing pda-table styling supplies borders / row tint; this
+ * modifier just tweaks alignment + label colouring. */
+.pda-table--keyvalue th {
+    text-align: right;
+    color: var(--pda-fg-bright);
+    width: 18%;
+    white-space: nowrap;
+}
+.pda-table--keyvalue td {
+    width: 32%;
+    vertical-align: middle;
+}
+@media (max-width: 768px) {
+    .pda-table--keyvalue th,
+    .pda-table--keyvalue td {
+        width: auto;
+        display: block;
+        text-align: left;
+    }
+    .pda-table--keyvalue th {
+        background: var(--pda-bg);
+        padding-bottom: 0;
+        font-size: var(--pda-size-sm);
+    }
+}
+
+/* Round-detail header (rounds/html/header.tpl): identifier left,
+ * status block centre, server/duration right. Three flex children
+ * with auto-stretch so each region claims a fair share but the
+ * centre takes overflow. */
+.pda-round-header {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    margin: 0 0 1em 0;
+    background: var(--pda-bg-elevated);
+    border: var(--pda-border-width) solid var(--pda-border);
+    box-shadow: var(--pda-glow);
+}
+.pda-round-header__id,
+.pda-round-header__status,
+.pda-round-header__meta {
+    padding: 14px 18px;
+    border-right: var(--pda-border-width) solid var(--pda-border-dim);
+}
+.pda-round-header__meta { border-right: none; }
+.pda-round-header__id {
+    flex: 0 0 auto;
+    min-width: 14em;
+    color: var(--pda-fg-bright);
+    font-size: var(--pda-size-lg);
+    text-shadow: var(--pda-glow);
+}
+.pda-round-header__map {
+    margin-top: 4px;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+.pda-round-header__status {
+    flex: 1 1 auto;
+    text-align: center;
+    color: var(--pda-fg);
+}
+.pda-round-header__mode {
+    font-size: var(--pda-size-lg);
+    color: var(--pda-fg-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.pda-round-header__result {
+    margin: 6px 0;
+}
+.pda-round-header__timing small { color: var(--pda-fg-muted); }
+.pda-round-header__meta {
+    flex: 0 0 auto;
+    min-width: 12em;
+    text-align: right;
+    color: var(--pda-fg-dim);
+}
+.pda-round-header__server {
+    font-size: var(--pda-size-lg);
+    color: var(--pda-fg-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.pda-round-header__duration {
+    margin-top: 4px;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+@media (max-width: 768px) {
+    .pda-round-header { flex-direction: column; }
+    .pda-round-header__id,
+    .pda-round-header__status,
+    .pda-round-header__meta {
+        border-right: none;
+        border-bottom: var(--pda-border-width) solid var(--pda-border-dim);
+        text-align: center;
+    }
+    .pda-round-header__meta { border-bottom: none; }
+}
+
+/* Prev/Next round navigator above the round detail tables. */
+.pda-round-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+    margin: 0.8em 0;
+}
+.pda-round-nav__prev,
+.pda-round-nav__next {
+    flex: 1 1 0;
+}
+.pda-round-nav__next { text-align: right; }
+
+/* Round detail "stats" list at the bottom of round.tpl. Renders the
+ * available stat keys as a wrapping inline list of pda-tag-shaped
+ * buttons. Distinct from .list-inline so it tightens spacing and
+ * applies the PDA monospace + bracket aesthetic. */
+.pda-stat-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.pda-stat-list li {
+    margin: 0;
+    padding: 0;
+}
+.pda-stat-list li a {
+    display: inline-block;
+    padding: 2px 8px;
+    color: var(--pda-fg);
+    background: var(--pda-bg-elevated);
+    border: var(--pda-border-width) solid var(--pda-border);
+    text-decoration: none;
+    text-transform: lowercase;
+}
+.pda-stat-list li a:hover {
+    background: var(--pda-fg);
+    color: var(--pda-bg);
+}
+.pda-stat-list li a code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+}
+
+/* Accent button variant (for "highlighted" actions like the
+ * collated-logs / log-listing buttons in rounds/html/basic.tpl). */
+.pda-button--accent,
+body.pda-theme .pda-button--accent {
+    color: var(--pda-accent);
+    border-color: var(--pda-accent);
+}
+.pda-button--accent:hover,
+body.pda-theme .pda-button--accent:hover {
+    background: var(--pda-accent);
+    color: var(--pda-bg);
+    border-color: var(--pda-accent);
+}
+
+/* pda-card body wrapper (matches the existing pda-card__title). */
+.pda-card__body {
+    padding: 0;
+    color: var(--pda-fg-dim);
+}
+
 /* Responsive: collapse nav into a wrapping list on narrow screens.
  * Dropdowns inline directly under their parent on mobile rather than
  * floating; users tap-toggle them. */
