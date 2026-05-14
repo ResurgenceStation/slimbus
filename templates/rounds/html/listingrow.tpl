@@ -13,6 +13,20 @@
   <td>{{round.map}}</td>
   <td>{{round.start_datetime}}</td>
   <td>{{round.duration}}</td>
-  <td>{{round.end_datetime}}</td>
+  <td>
+    {# Three-tier end-time display, matching upstream Statbus.            #}
+    {# end_datetime is written by SetRoundEnd during declare_completion;  #}
+    {# shutdown_datetime is written by SSdbcore.Shutdown during           #}
+    {# Master.Shutdown on world.Reboot. Both may be set, only one, or     #}
+    {# neither -- the round-end DM path determines which.                 #}
+    {% if round.end_datetime and round.shutdown_datetime %}
+      {{round.end_datetime}}
+      <small class="d-block text-muted">Shutdown: {{round.shutdown_datetime}}</small>
+    {% elseif round.shutdown_datetime %}
+      {{round.shutdown_datetime}}
+    {% else %}
+      <span class="text-muted"><i class="fas fa-skull-crossbones"></i> Server crashed - No end timings</span>
+    {% endif %}
+  </td>
   <td>{{round.server}}</td>
 </tr>
