@@ -1,23 +1,25 @@
 {% extends "base/index.html"%}
-{% block pagetitle %}{% endblock %}
+{% block pagetitle %}Stats{% endblock %}
+{% block titlebar %}STATS INDEX{% endblock %}
 {% block content %}
-<table class="table table-sm table-bordered">
+<table class="pda-table">
   <thead>
-    <tr>    
-      <th>Stat</th>   
-      <th>Type</th>  
+    <tr>
+      <th>Stat</th>
+      <th>Type</th>
       <th>Version</th>
-      <th>Rounds Recorded</th>    
-    </tr>   
+      <th>Rounds Recorded</th>
+    </tr>
   </thead>
   <tbody>
-{% for stat in stats %}
+  {% for stat in stats %}
     <tr>
-      <td><code><a href="{{path_for('stat.collate',{'stat': stat.key_name,'version': stat.version})}}">{{stat.key_name}}</a></code></td>
+      <td><code><a class="pda-link" href="{{path_for('stat.collate',{'stat': stat.key_name,'version': stat.version})}}">{{stat.key_name}}</a></code></td>
       <td>{{stat.key_type}}</td>
       <td>{{stat.version}}</td>
       <td>{{stat.rounds}}</td>
-{% endfor %}
+    </tr>
+  {% endfor %}
   </tbody>
 </table>
 {% endblock %}

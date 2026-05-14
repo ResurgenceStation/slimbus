@@ -1351,6 +1351,160 @@ body.pda-theme .engradio {
 /* "nw" helper used by admin_log.tpl and others to keep cells from wrapping. */
 body.pda-theme .nw { white-space: nowrap; }
 
+/* ---- poll metadata strip ---- */
+.pda-poll-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 1em;
+    text-align: center;
+}
+.pda-poll-meta__cell {
+    padding: 10px 14px;
+    background: var(--pda-bg-elevated);
+    border: var(--pda-border-width) solid var(--pda-border);
+}
+.pda-poll-meta__cell strong {
+    display: block;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ---- poll text-response entries ---- */
+.pda-poll-response {
+    display: grid;
+    grid-template-columns: 12em 1fr;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--pda-border-dim);
+}
+.pda-poll-response:last-child { border-bottom: none; }
+.pda-poll-response dt {
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+.pda-poll-response dd { margin: 0; }
+@media (max-width: 768px) {
+    .pda-poll-response { grid-template-columns: 1fr; }
+}
+
+/* ---- admin message card ----
+ * Used in messages/html/single.html. The base .pda-card supplies the
+ * bordered panel; these modifiers tint the header by message class
+ * (note severity / memo / etc).
+ */
+.pda-message__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5em;
+}
+.pda-message__title { flex: 1 1 auto; }
+.pda-message__timestamp {
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+    white-space: nowrap;
+}
+.pda-message__footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.pda-message--success .pda-card__title { color: var(--pda-fg-bright); }
+.pda-message--warning .pda-card__title { color: var(--pda-accent); }
+.pda-message--danger  .pda-card__title { color: var(--pda-danger); }
+
+/* ---- /me page header ---- */
+.pda-me-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin-bottom: 1em;
+}
+.pda-me-links {
+    margin: 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.pda-me-links h3 { margin: 0; }
+.pda-me-links h3 a {
+    text-decoration: none;
+    color: var(--pda-fg);
+}
+.pda-me-links h3 a:hover {
+    color: var(--pda-fg-bright);
+    background: var(--pda-bg-active);
+}
+
+/* ---- namevote ---- */
+.pda-namevote-nav {
+    display: flex;
+    gap: 4px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+}
+.pda-namevote { text-align: center; margin: 1em 0; }
+.pda-namevote__name {
+    font-size: 64px;
+    line-height: 1.05;
+    color: var(--pda-fg-bright);
+    margin: 12px 0;
+    text-shadow: var(--pda-glow);
+    word-break: break-word;
+}
+
+/* ---- player IP / CID row (flex layout matching original) ---- */
+.pda-id-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.pda-id-row__actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* ---- log file viewer card ---- */
+.pda-logfile {
+    margin-bottom: 1em;
+}
+.pda-logfile__body {
+    padding: 0;
+    background: var(--pda-bg);
+    max-height: 70vh;
+    overflow: auto;
+}
+.pda-logfile__body pre,
+.pda-logfile__body table,
+.pda-logfile__body div {
+    margin: 0;
+}
+.pda-logfile__body pre {
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    color: var(--pda-fg);
+    font-size: var(--pda-size-base);
+    line-height: 1.35;
+    white-space: pre-wrap;
+}
+
+/* ---- library delete form (floats button right on admin views) ---- */
+.pda-library-delete {
+    margin-top: 8px;
+    display: inline-block;
+    float: right;
+}
+
 /* Responsive: collapse nav into a wrapping list on narrow screens.
  * Dropdowns inline directly under their parent on mobile rather than
  * floating; users tap-toggle them. */
