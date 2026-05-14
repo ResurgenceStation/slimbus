@@ -1,9 +1,16 @@
 {#
-    Parameters:
-      * nbPages (int): number of pages
-      * currentPage (int): current pages
-      * url (string): route name & query (string): route parameter
-        ex: list/page-5?q=myFilter (5 = page and query = myFilter)
+    PDA-themed pagination component (Stage 2 migration).
+
+    Parameters (unchanged from the Bootstrap version):
+      * nbPages (int):     number of pages
+      * currentPage (int): current page
+      * url (string):      route base
+      * query (string):    optional query suffix
+
+    Output uses native .pda-pagination markup. Renders compact "<<" / "<" /
+    "1 2 3 4" / ">" / ">>" controls with the current page highlighted
+    via .pda-pagination__item--current. The "nearby pages" window
+    (4 either side of the current) is preserved from the original.
 #}
 {% set param = '' %}
 {% if not query %}
@@ -12,33 +19,31 @@
 {% spaceless %}
 {% if nbPages > 1 %}
 
-    {# Number of page around current page+1 #}
+    {# Number of pages around current page +/- #}
     {% set nearbyPagesLimit = 4 %}
 
-    <div>
-        <ul class="pagination">
-            {% if currentPage != 1 %}
-            <li class="page-item">
-                <a class="page-link" href="{{url}}{{query}}">First</a>
-            </li>
+    <nav class="pda-pagination" aria-label="page navigation">
+        {% if currentPage != 1 %}
+            <a class="pda-pagination__item" href="{{url}}{{query}}" aria-label="First page">&laquo; FIRST</a>
+            <a class="pda-pagination__item" href="{{url}}{{param}}/page/{{currentPage - 1}}{{query}}" aria-label="Previous page">&lsaquo;</a>
+        {% endif %}
+
+        {% for i in 1..nbPages %}
+            {% if 0 == (currentPage - nearbyPagesLimit) - loop.index %} {# dot before #}
+            {% elseif 0 == (currentPage + nearbyPagesLimit) - loop.index %} {# dot after #}
+            {% elseif 0 < (currentPage - nearbyPagesLimit) - loop.index %} {# hide all before #}
+            {% elseif 0 > (currentPage + nearbyPagesLimit) - loop.index %} {# hide all after #}
+            {% else %}
+                <a class="pda-pagination__item{% if currentPage == loop.index %} pda-pagination__item--current{% endif %}"
+                   href="{{url}}{{param}}/page/{{loop.index}}{{query}}"
+                   {% if currentPage == loop.index %}aria-current="page"{% endif %}>{{ loop.index }}</a>
             {% endif %}
-            {% for i in 1..nbPages %}
-                {% if 0 == (currentPage - nearbyPagesLimit) - loop.index %} {# dot before #}
-                {% elseif 0 == (currentPage + nearbyPagesLimit) - loop.index %} {# dot after #}
-                {% elseif 0 < (currentPage - nearbyPagesLimit) - loop.index %} {# hide all before #}
-                {% elseif 0 > (currentPage + nearbyPagesLimit) - loop.index %} {# hide all after #}
-                {% else %}
-                    <li {% if currentPage == loop.index  %} class="page-item active" {% else %} class="page-item" {% endif %}>
-                        <a class="page-link" href="{{url}}{{param}}/page/{{loop.index}}{{query}}">{{ loop.index }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-            {% if currentPage != nbPages %}
-            <li class="page-item">
-                <a class="page-link" href="{{url}}{{param}}/page/{{nbPages}}{{query}}">Last</a>
-            </li>
-            {% endif %}
-        </ul>
-    </div>
+        {% endfor %}
+
+        {% if currentPage != nbPages %}
+            <a class="pda-pagination__item" href="{{url}}{{param}}/page/{{currentPage + 1}}{{query}}" aria-label="Next page">&rsaquo;</a>
+            <a class="pda-pagination__item" href="{{url}}{{param}}/page/{{nbPages}}{{query}}" aria-label="Last page">LAST &raquo;</a>
+        {% endif %}
+    </nav>
 {% endif %}
 {% endspaceless %}

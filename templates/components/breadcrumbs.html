@@ -1,15 +1,22 @@
-<nav aria-label="breadcrumb" role="navigation">
-  <ol class="breadcrumb">
-    {% for n, u in nav %}
-      {% if loop.last %}
-        <li class="breadcrumb-item active">
-          {{n|raw}}
-        </li>
-        {% else %}
-        <li class="breadcrumb-item">
-          <a href="{{u}}">{{n|raw}}</a>
-        </li>
-      {% endif %}
-    {% endfor %}
-  </ol>
+{# PDA-themed breadcrumbs (Stage 2 migration).
+
+   Path-style separator '>' between items, last item highlighted as
+   the current location. Renders as a one-line bar at the top of the
+   page content, distinct from the global statusbar/titlebar which
+   are part of the outer pda-frame.
+
+   Loop input: `nav` is an associative array { 'Display Label' => 'url' }.
+
+   Example output:
+     [HOME] > [ROUNDS] > [#123]
+#}
+<nav aria-label="breadcrumb" role="navigation" class="pda-breadcrumbs">
+  {% for n, u in nav %}
+    {%- if loop.last -%}
+      <span class="pda-breadcrumbs__current">{{n|raw}}</span>
+    {%- else -%}
+      <a href="{{u}}">{{n|raw}}</a><span class="pda-breadcrumbs__sep"></span>
+    {%- endif -%}
+  {% endfor %}
+  <span class="pda-cursor"></span>
 </nav>
