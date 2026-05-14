@@ -4,42 +4,100 @@
   <title>{{statbus.app_name}} {% block pagetitle %}{% endblock %}</title>
   {% include 'base/common/header.html' %}
 </head>
-<body>
-  {% block nav %} {{ include('base/nav.tpl') }} {% endblock %}
-  <main role="main">
-    <div class="container{% if wide is defined and wide %}-fluid{% endif %} position-relative" id="container">
-      {{alert|raw}}
-      {% if breadcrumbs is defined and breadcrumbs|length > 1 %}
-        {% set nav = breadcrumbs %}
-        {% include('components/breadcrumbs.html') with nav %}
+{# PDA theme baseline: body class triggers pda.css. Add pda-crt for
+   CRT scanlines, pda-amber / pda-cyan for palette swaps. Operators can
+   override these defaults in their own templates/base/common/header.html
+   overlay if they want a different visual mode. #}
+<body class="pda-theme">
+
+{# Outer frame -- PDA bezel. Templates that don't want the frame (full-
+   screen viewers, map embeds, etc.) can override {% block frame %} to
+   skip it. The frame is decorative only; it doesn't constrain content. #}
+{% block frame %}
+<div class="pda-frame">
+  <span class="pda-frame__corner-bl"></span>
+  <span class="pda-frame__corner-br"></span>
+
+  {# Status bar: site identity, current section, viewer info, clock. #}
+  <div class="pda-frame__statusbar">
+    <span class="pda-frame__statusbar-section pda-frame__statusbar-section--ok">
+      {{statbus.app_name|default('STATBUS')}}
+    </span>
+    <span class="pda-frame__statusbar-section">
+      {% if user and user.ckey %}
+        USER: {{user.ckey|upper}}
+      {% else %}
+        USER: GUEST
       {% endif %}
+    </span>
+    <span class="pda-frame__statusbar-section">
       {% if classified is defined and classified %}
-      <div class="alert alert-warning">
-        Information in TGDB should be considered <strong>TLP:://AMBER</strong>, unless otherwise noted.
-      </div>
+        <span class="pda-tag pda-tag--warn">CLASSIFIED</span>
       {% endif %}
-      {% block content %} {% endblock %}
-    </div>
-  </main>
-  <footer>
-    <div class="container{% if wide is defined and wide %}-fluid{% endif %} position-relative" id="container">
-      <hr>
-      <div class="row">
-        <div class="col">
-          <p class="text-muted">All times are UTC</p>
-          <p class="text-muted">Data presented here should be treated as preliminary and non-operational</p>
+    </span>
+    <span class="pda-frame__statusbar-section" id="pda-clock">
+      {{app.currentDate|default('---')}}
+    </span>
+  </div>
+
+  {# Title bar: route/section name. Templates can override the title via
+     {% block titlebar %}. Default renders the deepest breadcrumb entry. #}
+  <div class="pda-frame__titlebar">
+    {% block titlebar %}
+      {% if breadcrumbs is defined and breadcrumbs|length > 0 %}
+        {%- for label, url in breadcrumbs -%}
+          {{- label|upper -}}{% if not loop.last %} / {% endif %}
+        {%- endfor -%}
+      {% else %}
+        TERMINAL
+      {% endif %}
+    {% endblock %}
+    <span class="pda-cursor"></span>
+  </div>
+
+  <div class="pda-frame__body">
+    {% block nav %} {{ include('base/nav.tpl') }} {% endblock %}
+
+    <main role="main">
+      <div class="container{% if wide is defined and wide %}-fluid{% endif %} position-relative" id="container">
+        {{alert|raw}}
+
+        {% if breadcrumbs is defined and breadcrumbs|length > 1 %}
+          {% set nav = breadcrumbs %}
+          {% include('components/breadcrumbs.html') with nav %}
+        {% endif %}
+
+        {% if classified is defined and classified %}
+        <div class="alert alert-warning">
+          Information in TGDB should be considered <strong>TLP:://AMBER</strong>, unless otherwise noted.
         </div>
-        <div class="col">
-          {% if settings.bug_reports %}
-          <p class="text-muted">Found a bug? Have a feature request? Report it <a href="{{settings.bug_reports}}" target="_blank" rel="noopener noreferrer">here</a>.</p>
-          {% endif %}
-          <samp class="text-muted" id="clock">{{app.currentDate}}</samp>
-        </div>
+        {% endif %}
+
+        {% block content %} {% endblock %}
       </div>
-    </div>
-  </footer>
-  {% include 'base/common/footer.html' %}
-  {% block js %}
-  {% endblock %}
+    </main>
+  </div>
+
+  {# Function-bar style footer. Matches PDA "F1-F12 hint row" pattern. #}
+  <div class="pda-frame__footer">
+    <span>
+      <span class="pda-tag">TIMES: UTC</span>
+      <span class="pda-tag pda-tag--warn">PREVIEW DATA</span>
+    </span>
+    <span>
+      {% if settings.bug_reports %}
+        <a class="pda-link" href="{{settings.bug_reports}}" target="_blank" rel="noopener noreferrer">REPORT BUG</a>
+      {% endif %}
+    </span>
+    <span>
+      <samp id="clock">{{app.currentDate}}</samp>
+    </span>
+  </div>
+</div>
+{% endblock %}
+
+{% include 'base/common/footer.html' %}
+{% block js %}
+{% endblock %}
 </body>
 </html>
