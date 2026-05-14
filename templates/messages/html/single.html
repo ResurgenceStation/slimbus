@@ -1,16 +1,24 @@
-<div class="card {{message.type}} mb-4">
-  <div class="card-header {{message.class}} d-flex justify-content-between">
-    <span class="message-title"><i class="fas fa-{{message.icon}}"></i> {{message.type}} <a href="{{path_for('message.single', {'id': message.id})}}" class="{{message.class}}">#{{message.id}}</a> 
-    {% if 'Memo' != message.type %} for <a href="{{path_for('player.single',{'ckey': message.target.ckey})}}">{{message.target.label|raw}}</a>
-    {% endif %} by {{message.admin.label|raw}}</span>
-    <span class="message-timestamp">Posted {{message.timestamp|timestamp}}</span>
+{# PDA-themed admin message card. Severity / type colours via pda-card variants. #}
+<div class="pda-card pda-message pda-message--{{message.class|default('default')}}">
+  <div class="pda-card__title pda-message__header">
+    <span class="pda-message__title">
+      <i class="fas fa-{{message.icon}}"></i> {{message.type}}
+      <a class="pda-link" href="{{path_for('message.single', {'id': message.id})}}">#{{message.id}}</a>
+      {% if 'Memo' != message.type %}
+        for <a class="pda-link" href="{{path_for('player.single',{'ckey': message.target.ckey})}}">{{message.target.label|raw}}</a>
+      {% endif %}
+      by {{message.admin.label|raw}}
+    </span>
+    <span class="pda-message__timestamp">Posted {{message.timestamp|timestamp}}</span>
   </div>
-  <div class="card-body">{{message.text|raw}}</div>
-  <div class="card-footer d-flex justify-content-between">
-    <span>During <a href="{{path_for('round.single',{'id': message.round})}}"><i class="fas fa-circle"></i> {{message.round}}</a> on {{message.server}}</span>
+
+  <div class="pda-card__body pda-card__body--padded">{{message.text|raw}}</div>
+
+  <div class="pda-card__footer pda-message__footer">
+    <span>During <a class="pda-link" href="{{path_for('round.single',{'id': message.round})}}"><i class="fas fa-circle"></i> {{message.round}}</a> on {{message.server}}</span>
     {% if 'Note' == message.type %}
     <span>Severity:
-    <span class="badge badge-{{message.severity_class}}" data-toggle="tooltip" title="{{message.severity}} Severity {{message.type}}">{{message.severity}}</span>
+      <span class="pda-tag pda-tag--{{message.severity_class == 'danger' ? 'err' : (message.severity_class == 'warning' ? 'warn' : 'ok')}}" data-toggle="tooltip" title="{{message.severity}} Severity {{message.type}}">{{message.severity}}</span>
     </span>
     {% endif %}
     <span>{% if message.expire %}Expires: {{message.expire|timestamp}} {% endif %}</span>
@@ -24,4 +32,3 @@
     <span>{% if message.lasteditor %}Last edited by {{message.editor.label|raw}} {% endif %}</span>
   </div>
 </div>
-

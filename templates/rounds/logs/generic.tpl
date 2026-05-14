@@ -1,4 +1,4 @@
-<table class="table table-bordered table-condensed table-hover">
+<table class="pda-table">
   <thead>
     <tr>
       <th>Timestamp</th>
@@ -12,12 +12,12 @@
   <tbody>
   {% for line in file %}
     <tr>
-      <td class="align-middle">{{line.timestamp}}</td>
-      <td class="align-middle" style="background: #{{line.color}}"><code class="bg">{{line.device}}</code></td>
-      <td class="align-middle">{{line.x}}</td>
-      <td class="align-middle">{{line.y}}</td>
-      <td class="align-middle">{{line.z}}</td>
-      <td class="align-middle">{{line.text|raw}}</td>
+      <td>{{line.timestamp}}</td>
+      <td style="background: #{{line.color}}"><code class="bg">{{line.device}}</code></td>
+      <td>{{line.x}}</td>
+      <td>{{line.y}}</td>
+      <td>{{line.z}}</td>
+      <td>{{line.text|raw}}</td>
     </tr>
   {% endfor %}
   </tbody>
