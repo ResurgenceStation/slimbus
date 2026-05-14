@@ -785,6 +785,572 @@ body.pda-theme .pda-input--sm {
     max-width: 100%;
 }
 
+/* ---- round-family components (Stage 3 migration targets) ----
+ * Specialised layouts for the rounds/* templates. Built on the
+ * native pda-card / pda-table / pda-button primitives but with
+ * round-specific structure baked in.
+ */
+
+/* Round listing toolbar (top of rounds/listing.tpl): pagination on the
+ * left, page metadata on the right. Wraps on narrow viewports. */
+.pda-listing-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1em;
+    flex-wrap: wrap;
+    margin-bottom: 0.8em;
+}
+.pda-listing-toolbar__meta {
+    text-align: right;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+.pda-listing-toolbar__meta small { color: var(--pda-fg-muted); }
+
+/* Key/value-style pda-table: two label/value column pairs per row.
+ * Labels are right-aligned narrow columns, values are wider. The
+ * existing pda-table styling supplies borders / row tint; this
+ * modifier just tweaks alignment + label colouring. */
+.pda-table--keyvalue th {
+    text-align: right;
+    color: var(--pda-fg-bright);
+    width: 18%;
+    white-space: nowrap;
+}
+.pda-table--keyvalue td {
+    width: 32%;
+    vertical-align: middle;
+}
+@media (max-width: 768px) {
+    .pda-table--keyvalue th,
+    .pda-table--keyvalue td {
+        width: auto;
+        display: block;
+        text-align: left;
+    }
+    .pda-table--keyvalue th {
+        background: var(--pda-bg);
+        padding-bottom: 0;
+        font-size: var(--pda-size-sm);
+    }
+}
+
+/* Round-detail header (rounds/html/header.tpl): identifier left,
+ * status block centre, server/duration right. Three flex children
+ * with auto-stretch so each region claims a fair share but the
+ * centre takes overflow. */
+.pda-round-header {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    margin: 0 0 1em 0;
+    background: var(--pda-bg-elevated);
+    border: var(--pda-border-width) solid var(--pda-border);
+    box-shadow: var(--pda-glow);
+}
+.pda-round-header__id,
+.pda-round-header__status,
+.pda-round-header__meta {
+    padding: 14px 18px;
+    border-right: var(--pda-border-width) solid var(--pda-border-dim);
+}
+.pda-round-header__meta { border-right: none; }
+.pda-round-header__id {
+    flex: 0 0 auto;
+    min-width: 14em;
+    color: var(--pda-fg-bright);
+    font-size: var(--pda-size-lg);
+    text-shadow: var(--pda-glow);
+}
+.pda-round-header__map {
+    margin-top: 4px;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+.pda-round-header__status {
+    flex: 1 1 auto;
+    text-align: center;
+    color: var(--pda-fg);
+}
+.pda-round-header__mode {
+    font-size: var(--pda-size-lg);
+    color: var(--pda-fg-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.pda-round-header__result {
+    margin: 6px 0;
+}
+.pda-round-header__timing small { color: var(--pda-fg-muted); }
+.pda-round-header__meta {
+    flex: 0 0 auto;
+    min-width: 12em;
+    text-align: right;
+    color: var(--pda-fg-dim);
+}
+.pda-round-header__server {
+    font-size: var(--pda-size-lg);
+    color: var(--pda-fg-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.pda-round-header__duration {
+    margin-top: 4px;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+@media (max-width: 768px) {
+    .pda-round-header { flex-direction: column; }
+    .pda-round-header__id,
+    .pda-round-header__status,
+    .pda-round-header__meta {
+        border-right: none;
+        border-bottom: var(--pda-border-width) solid var(--pda-border-dim);
+        text-align: center;
+    }
+    .pda-round-header__meta { border-bottom: none; }
+}
+
+/* Prev/Next round navigator above the round detail tables. */
+.pda-round-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+    margin: 0.8em 0;
+}
+.pda-round-nav__prev,
+.pda-round-nav__next {
+    flex: 1 1 0;
+}
+.pda-round-nav__next { text-align: right; }
+
+/* Round detail "stats" list at the bottom of round.tpl. Renders the
+ * available stat keys as a wrapping inline list of pda-tag-shaped
+ * buttons. Distinct from .list-inline so it tightens spacing and
+ * applies the PDA monospace + bracket aesthetic. */
+.pda-stat-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.pda-stat-list li {
+    margin: 0;
+    padding: 0;
+}
+.pda-stat-list li a {
+    display: inline-block;
+    padding: 2px 8px;
+    color: var(--pda-fg);
+    background: var(--pda-bg-elevated);
+    border: var(--pda-border-width) solid var(--pda-border);
+    text-decoration: none;
+    text-transform: lowercase;
+}
+.pda-stat-list li a:hover {
+    background: var(--pda-fg);
+    color: var(--pda-bg);
+}
+.pda-stat-list li a code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+}
+
+/* Accent button variant (for "highlighted" actions like the
+ * collated-logs / log-listing buttons in rounds/html/basic.tpl). */
+.pda-button--accent,
+body.pda-theme .pda-button--accent {
+    color: var(--pda-accent);
+    border-color: var(--pda-accent);
+}
+.pda-button--accent:hover,
+body.pda-theme .pda-button--accent:hover {
+    background: var(--pda-accent);
+    color: var(--pda-bg);
+    border-color: var(--pda-accent);
+}
+
+/* pda-card body wrapper (matches the existing pda-card__title). */
+.pda-card__body {
+    padding: 0;
+    color: var(--pda-fg-dim);
+}
+
+/* ---- index / dashboard jumbotron-style readouts ----
+ * Replaces Bootstrap .jumbotron + .display-N big-number blocks with
+ * a PDA "READOUT" panel: small caps label above, big monospace count,
+ * caption below. Stacks horizontally in a grid on wide screens.
+ */
+.pda-jumbotron-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 1em;
+}
+.pda-jumbotron-grid--single { grid-template-columns: 1fr; }
+
+.pda-jumbotron {
+    text-align: center;
+    padding: 22px 14px;
+}
+.pda-jumbotron__label {
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+.pda-jumbotron__count {
+    color: var(--pda-fg-bright);
+    font-size: 48px;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    text-shadow: var(--pda-glow);
+    margin: 4px 0;
+}
+.pda-jumbotron__caption {
+    color: var(--pda-fg-dim);
+    font-size: var(--pda-size-base);
+}
+
+.pda-poly {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: var(--pda-border-width) solid var(--pda-border-dim);
+    background: var(--pda-bg-elevated);
+    color: var(--pda-fg);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ---- error page ---- */
+.pda-error {
+    text-align: center;
+    padding: 28px 18px;
+    border: 2px dashed var(--pda-danger);
+}
+.pda-error__code {
+    font-size: 56px;
+    color: var(--pda-danger);
+    text-shadow: 0 0 8px rgba(255, 85, 102, 0.45);
+    letter-spacing: 0.06em;
+    line-height: 1;
+    margin-bottom: 12px;
+}
+.pda-error__code small {
+    display: block;
+    font-size: var(--pda-size-sm);
+    color: var(--pda-fg-muted);
+    letter-spacing: 0.18em;
+    margin-bottom: 4px;
+}
+.pda-error__message {
+    font-size: var(--pda-size-lg);
+    color: var(--pda-fg);
+    margin: 10px 0 18px;
+}
+.pda-error__actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+/* ---- list-group: terminal-line list ----
+ * Slimbus uses .list-group > .list-group-item heavily for player
+ * info panels, alts lists, etc. PDA aesthetic: each item is a
+ * terminal-line with a leading `>` prompt, separated by thin dashed
+ * lines (the existing list-group-item override in Section 7 handles
+ * dark backgrounds and border colours; this layer adds the prompt). */
+.pda-list-group,
+body.pda-theme .list-group {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1em 0;
+    border: var(--pda-border-width) solid var(--pda-border);
+    background: var(--pda-bg-elevated);
+}
+.pda-list-group__item,
+body.pda-theme .list-group-item {
+    border: none;
+    border-bottom: 1px dashed var(--pda-border-dim);
+    background: transparent;
+    color: var(--pda-fg-dim);
+    padding: 6px 12px;
+    border-radius: var(--pda-radius);
+}
+.pda-list-group__item:last-child,
+body.pda-theme .list-group-item:last-child { border-bottom: none; }
+
+/* Coloured list-group-item variants (Bootstrap .list-group-item-{warn,err,ok}) */
+body.pda-theme .list-group-item-success,
+body.pda-theme .list-group-item-info     { border-left: 4px solid var(--pda-fg); color: var(--pda-fg); }
+body.pda-theme .list-group-item-warning  { border-left: 4px solid var(--pda-accent); color: var(--pda-accent); }
+body.pda-theme .list-group-item-danger   { border-left: 4px solid var(--pda-danger); color: var(--pda-danger); }
+
+/* ---- progress bar: unicode-block style ----
+ * Bootstrap .progress / .progress-bar gets re-styled as a thin
+ * terminal bar with stacked tinted segments. Used on player single
+ * page for ghost/living ratio etc.
+ */
+body.pda-theme .progress {
+    background: var(--pda-bg);
+    height: 14px;
+    border: var(--pda-border-width) solid var(--pda-border);
+    border-radius: var(--pda-radius);
+    overflow: hidden;
+    box-shadow: none;
+}
+body.pda-theme .progress-bar {
+    background: var(--pda-fg);
+    color: var(--pda-bg);
+    font-family: var(--pda-font-mono);
+    font-size: var(--pda-size-sm);
+    line-height: 14px;
+    transition: none;
+    box-shadow: none;
+}
+body.pda-theme .progress-bar.bg-success { background: var(--pda-fg-bright); }
+body.pda-theme .progress-bar.bg-warning { background: var(--pda-accent); color: var(--pda-bg); }
+body.pda-theme .progress-bar.bg-danger  { background: var(--pda-danger);  color: var(--pda-bg); }
+body.pda-theme .progress-bar.bg-info    { background: var(--pda-info);    color: var(--pda-bg); }
+
+/* TLP markers (player IP / CID) -- already used by templates with
+ * .tlp.tlp-red. Re-style as bracketed danger tags. */
+body.pda-theme .tlp {
+    font-family: var(--pda-font-mono);
+    padding: 0 4px;
+    border: var(--pda-border-width) solid var(--pda-border);
+    text-transform: uppercase;
+}
+body.pda-theme .tlp.tlp-red { color: var(--pda-danger); border-color: var(--pda-danger); }
+body.pda-theme .tlp::before { content: "["; opacity: 0.6; }
+body.pda-theme .tlp::after  { content: "]"; opacity: 0.6; }
+
+/* ---- "engradio" Poly broadcast block on the homepage ---- */
+body.pda-theme .engradio {
+    color: var(--pda-fg);
+    font-family: var(--pda-font-mono);
+}
+
+/* ---- pda-grid: responsive equal-column flex/grid ----
+ * Slimbus uses Bootstrap .row > .col-lg-X .col-md-12 grids on the
+ * death detail page, round detail blocks, alt-ckey lists, etc.
+ * .pda-grid replaces these with CSS grid that auto-stacks at
+ * the same breakpoint Bootstrap was using. Variant modifiers fix
+ * the column count when the visual design calls for it. */
+.pda-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 1em;
+}
+.pda-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pda-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 768px) {
+    .pda-grid,
+    .pda-grid--2,
+    .pda-grid--3 { grid-template-columns: 1fr; }
+}
+
+/* ---- pda-card variants and inner-body padding ----
+ * The base .pda-card already has the bordered-panel look with
+ * a __title bar at top. These modifiers tune the body padding,
+ * add a footer band, or apply state-coloured borders. */
+.pda-card__body--padded { padding: 14px 18px; }
+.pda-card__footer {
+    padding: 6px 14px;
+    background: var(--pda-bg);
+    border-top: var(--pda-border-width) solid var(--pda-border-dim);
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+.pda-card--alert {
+    border-color: var(--pda-accent);
+}
+.pda-card--alert .pda-card__title {
+    color: var(--pda-accent);
+}
+.pda-card--deleted {
+    border-style: dashed;
+    color: var(--pda-fg-muted);
+}
+
+/* ---- pda-readout ----
+ * For prominent numeric / single-value displays inside a card,
+ * like a death's "Cause of Death" or "Time of Death". Larger
+ * monospace text, slightly green-tinted glow. */
+.pda-readout {
+    font-size: var(--pda-size-lg);
+    color: var(--pda-fg-bright);
+    line-height: 1.4;
+}
+.pda-readout small {
+    display: block;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+    margin-top: 4px;
+}
+
+/* ---- pda-iframe ---- */
+.pda-iframe {
+    border: var(--pda-border-width) solid var(--pda-border);
+    width: 100%;
+    min-height: 240px;
+    background: var(--pda-bg);
+    margin: 8px 0;
+}
+
+/* ---- pda-blockquote (death/lastwords contexts) ---- */
+.pda-blockquote {
+    margin: 0;
+    padding: 8px 14px;
+    border-left: 4px solid var(--pda-fg-muted);
+    background: var(--pda-bg);
+    color: var(--pda-fg);
+}
+.pda-blockquote p { margin: 0; font-style: italic; }
+.pda-blockquote footer {
+    margin-top: 4px;
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+    text-align: right;
+}
+
+/* ---- pda-quote-list (last words listing) ---- */
+.pda-quote-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.pda-quote-list li {
+    padding: 4px 10px;
+    background: var(--pda-bg-elevated);
+    border: var(--pda-border-width) solid var(--pda-border-dim);
+}
+.pda-quote-list li a { text-decoration: none; }
+.pda-quote-list li a code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--pda-fg);
+}
+
+/* ---- pda-library-search (inline search form) ---- */
+.pda-library-search {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* ---- pda-book (library single book view) ---- */
+.pda-book__content {
+    padding: 14px 18px;
+    background: var(--pda-bg);
+    color: var(--pda-fg);
+    line-height: 1.5;
+    min-height: 6em;
+}
+.pda-book__content em,
+.pda-book__content i { color: var(--pda-fg-bright); }
+.pda-book__content code { background: transparent; border: none; color: var(--pda-fg); }
+
+/* ---- pda-bulletlist (unordered list with terminal-prompt bullets) ---- */
+.pda-bulletlist {
+    list-style: none;
+    padding-left: 0;
+    margin: 8px 0;
+}
+.pda-bulletlist > li {
+    padding-left: 1.4em;
+    position: relative;
+    color: var(--pda-fg-dim);
+}
+.pda-bulletlist > li::before {
+    content: ">";
+    position: absolute;
+    left: 0;
+    color: var(--pda-fg-muted);
+}
+
+/* ---- admin info forms ----
+ * The admin pages (info/admins.tpl, info/winloss.tpl, info/30days.tpl,
+ * etc.) use form rows with sliders, date pickers, intervals. PDA
+ * style: tight horizontal flex of label + input + button. */
+.pda-admins-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1em;
+}
+.pda-admins-form__label {
+    color: var(--pda-fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0;
+}
+.pda-roles-form,
+.pda-winloss-form { margin-bottom: 1em; }
+
+/* ---- admin perm flag cells (info/admins.tpl) ---- */
+.pda-perm {
+    text-align: center;
+    width: 1.6em;
+}
+.pda-perm--ok { color: var(--pda-fg-bright); }
+.pda-perm--no { color: var(--pda-danger); opacity: 0.6; }
+
+/* ---- noUiSlider theme adaptation ----
+ * noUiSlider ships its own CSS via CDN. These are minor overrides
+ * to coerce its colours into our palette. Scoped to .pda-slider so
+ * any non-themed sliders elsewhere are unaffected. */
+.pda-slider {
+    margin: 8px 4px;
+}
+.pda-slider .noUi-target,
+.pda-slider.noUi-target {
+    background: var(--pda-bg);
+    border: var(--pda-border-width) solid var(--pda-border);
+    border-radius: var(--pda-radius);
+    box-shadow: none;
+}
+.pda-slider .noUi-connect {
+    background: var(--pda-fg);
+    box-shadow: none;
+}
+.pda-slider .noUi-handle {
+    background: var(--pda-fg);
+    border: var(--pda-border-width) solid var(--pda-border-bright);
+    border-radius: var(--pda-radius);
+    box-shadow: var(--pda-glow);
+}
+.pda-slider .noUi-handle::before,
+.pda-slider .noUi-handle::after { background: var(--pda-bg); }
+.pda-slider .noUi-tooltip {
+    background: var(--pda-bg-elevated);
+    color: var(--pda-fg);
+    border: var(--pda-border-width) solid var(--pda-border);
+    border-radius: var(--pda-radius);
+    font-family: var(--pda-font-mono);
+}
+
+/* ---- pda-chart wrapper for canvas elements ----
+ * Adds a slight inner shadow to the canvas card so charts feel like
+ * they sit inside an instrumentation panel. */
+.pda-chart { position: relative; }
+.pda-chart .pda-card__body { background: var(--pda-bg-elevated); }
+.pda-chart canvas { background: transparent; border: none; width: 100%; }
+
+/* "nw" helper used by admin_log.tpl and others to keep cells from wrapping. */
+body.pda-theme .nw { white-space: nowrap; }
+
 /* Responsive: collapse nav into a wrapping list on narrow screens.
  * Dropdowns inline directly under their parent on mobile rather than
  * floating; users tap-toggle them. */

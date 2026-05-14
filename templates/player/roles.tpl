@@ -1,37 +1,28 @@
 {% extends "index.tpl"%}
+{% block titlebar %}ROLES / {{player.ckey|upper}}{% endblock %}
 {% block content %}
 <h2>{{player.label|raw}}</h2>
-</h2>
-<hr>
 <p>Current range: <strong><code>{{start}} - {{end}}</code></strong></p>
-<br>
-<form>
-  <div class="row">
-    <div class="col">
-      <div id="slider"></div>
+
+<form class="pda-card pda-roles-form">
+  <div class="pda-card__body pda-card__body--padded">
+    <div id="slider" class="pda-slider"></div>
+
+    <div class="pda-grid pda-grid--2" style="margin-top: 12px;">
+      <input type="text" class="pda-input" placeholder="Start Date" id="start" name="start">
+      <input type="text" class="pda-input" placeholder="End Date" id="end" name="end">
     </div>
-  </div>
-  <br>
-  <div class="row">
-    <div class="col">
-      <input type="text" class="form-control" placeholder="Start Date" id="start" name="start">
-    </div>
-    <div class="col">
-      <input type="text" class="form-control" placeholder="End Date" id="end" name="end">
-    </div>
-  </div>
-  <br>
-  <div class="row">
-    <div class="col">
-      <button type="submit" class="btn btn-primary">Apply Range</button>
-    </div>
+
+    <button type="submit" class="pda-button" style="margin-top: 12px;">Apply Range</button>
   </div>
 </form>
-<hr>
-<h3>Role Time</h3>
-  <div id="roletime">
 
+<h3>Role Time</h3>
+<div class="pda-card pda-chart">
+  <div class="pda-card__body pda-card__body--padded">
+    <div id="roletime"></div>
   </div>
+</div>
 
 {% endblock %}
 {% block js %}
@@ -39,7 +30,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css" integrity="sha256-tkYpq+Xdq4PQNNGRDPtH3G55auZB4+kh/RA80Abngaw=" crossorigin="anonymous" />
 <script>
   function timestamp(str){
-    return new Date(str).getTime();   
+    return new Date(str).getTime();
   }
 
   function formatToYMD(date) {
@@ -76,6 +67,16 @@
 <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 <script>
+/* PDA-themed Plotly layout. Reads colour vars off the live body
+ * so amber / cyan palette switches also retint the chart. */
+function getPdaVar(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+var pdaFg     = getPdaVar('--pda-fg')        || '#00ff7f';
+var pdaFgDim  = getPdaVar('--pda-fg-dim')    || '#00cc66';
+var pdaBg     = getPdaVar('--pda-bg-elevated') || '#00321a';
+var pdaBorder = getPdaVar('--pda-border')    || '#00aa55';
+
 var data = {{player.role_time|raw}};
 var jobs = unpack(data,'job');
 var minutes = unpack(data,'minutes');
@@ -83,11 +84,17 @@ var trace1 = {
   x: jobs,
   y: minutes,
   type: 'bar',
-  name: 'Minutes'
+  name: 'Minutes',
+  marker: { color: pdaFg }
 }
 
 var layout = {
-  title: 'Role Time (Minutes)',
+  title: { text: 'Role Time (Minutes)', font: { color: pdaFg, family: 'VT323, monospace' } },
+  paper_bgcolor: 'transparent',
+  plot_bgcolor: pdaBg,
+  font: { color: pdaFgDim, family: 'VT323, monospace' },
+  xaxis: { gridcolor: pdaBorder, linecolor: pdaBorder, tickfont: { color: pdaFgDim } },
+  yaxis: { gridcolor: pdaBorder, linecolor: pdaBorder, tickfont: { color: pdaFgDim } }
 };
 var data = [trace1]
 Plotly.newPlot('roletime',data, layout)
