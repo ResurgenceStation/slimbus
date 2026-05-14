@@ -90,8 +90,19 @@
       <tr>
         <th class="align-middle text-right">Initialization Time</th>
         <td class="align-middle">{{round.initialize_datetime}}</td>
-        <th class="align-middle text-right">Shutdown Time</th>
-        <td class="align-middle">{{round.shutdown_datetime}}</td>
+        <th class="align-middle text-right">End Time</th>
+        <td class="align-middle">
+          {# Three-tier end-time display, matching upstream Statbus. #}
+          {% if round.end_datetime and round.shutdown_datetime %}
+            {{round.end_datetime}}
+            <small class="d-block text-muted">Shutdown: {{round.shutdown_datetime}}</small>
+          {% elseif round.shutdown_datetime %}
+            {{round.shutdown_datetime}}
+            <small class="d-block text-muted">(end_datetime not recorded, shown is shutdown_datetime)</small>
+          {% else %}
+            <span class="text-muted"><i class="fas fa-skull-crossbones"></i> Server crashed - No end timings</span>
+          {% endif %}
+        </td>
       </tr>
       <tr>
         {% if round.data.byond_version %}

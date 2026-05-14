@@ -43,17 +43,29 @@ class RoundController Extends Controller {
     if(isset($args['page'])) {
       $this->page = filter_var($args['page'], FILTER_VALIDATE_INT);
     }
+    // Show every round that recorded SOME completion signal -- either
+    // end_datetime (written by SetRoundEnd during declare_completion at
+    // round-end) OR shutdown_datetime (written by SSdbcore.Shutdown during
+    // Master.Shutdown on world.Reboot). Either column means the round
+    // genuinely concluded; only crashed/SIGKILLed rounds have both NULL.
+    // ORDER BY COALESCE(end_datetime, shutdown_datetime) so rounds sort by
+    // when they actually ended, preferring end_datetime (the "true" round
+    // end time) when present and falling back to shutdown_datetime otherwise.
     $rounds = $this->DB->run("SELECT $this->columns
       FROM tbl_round
-      WHERE tbl_round.shutdown_datetime IS NOT NULL
-      ORDER BY tbl_round.shutdown_datetime DESC
+      WHERE (tbl_round.end_datetime IS NOT NULL OR tbl_round.shutdown_datetime IS NOT NULL)
+      ORDER BY COALESCE(tbl_round.end_datetime, tbl_round.shutdown_datetime) DESC
       LIMIT ?,?", ($this->page * $this->per_page) - $this->per_page, $this->per_page);
 
     foreach ($rounds as &$round){
       $round = $this->roundModel->parseRound($round);
     }
     if($rounds){
-      $this->firstListing = $rounds[0]->end_datetime;
+      // Prefer end_datetime for the freshness header but fall back to
+      // shutdown_datetime so admin-rebooted rounds (which have no
+      // end_datetime by design - upstream tgstation matches this) still
+      // contribute a meaningful "last updated" timestamp.
+      $this->firstListing = $rounds[0]->end_datetime ?: $rounds[0]->shutdown_datetime;
       $this->lastListing = end($rounds)->start_datetime;
     } else {
       $this->firstListing = null;
@@ -154,7 +166,7 @@ class RoundController Extends Controller {
       LEFT JOIN tbl_round AS prev ON prev.id = tbl_round.id - 1
       LEFT JOIN tbl_death AS D ON D.round_id = tbl_round.id
       WHERE tbl_round.id = ?
-      AND tbl_round.shutdown_datetime IS NOT NULL", $id);
+      AND (tbl_round.end_datetime IS NOT NULL OR tbl_round.shutdown_datetime IS NOT NULL)", $id);
     $round = $this->roundModel->parseRound($round);
     $url = parent::getFullURL($this->router->pathFor('round.single',['id'=>$round->id]));
     $this->breadcrumbs[$round->id] = $url;
