@@ -1,4 +1,5 @@
 {% extends "index.tpl"%}
+{% block titlebar %}ROUND #{{round.id}} / {{round.extraData|upper}}{% endblock %}
 {% block content%}
 {% include('rounds/html/basic.tpl') %}
 
@@ -15,9 +16,8 @@
   {% include "rounds/detail/round_end.tpl" %}
 {% else %}
   <h3><code>{{round.extraData}}</code></h3>
-  <hr>
   <p class="text-muted">Lines are color-coded for your convenience!</p>
-  <table class="table table-bordered table-condensed table-hover">
+  <table class="pda-table">
     <thead>
       <tr>
         <th>Timestamp</th>
@@ -47,31 +47,25 @@
 
 {% block js %}
 <script>
-  $.ajax({
-    url: '{{app.url}}api/parsedLogStatus.php',
-    data: {
-      round: {{round.id}}
-    },
-    method: 'GET'
-  })
-  .done(function(e){
-    console.log(e);
-    if (e){
-      $('#logStatus').toggleClass('btn-warning').toggleClass('disabled').toggleClass('btn-success').text('View parsed');
-    } else {
-      $('#logStatus').text('Parsing...');
-      $.ajax({
-        url: '{{app.url}}api/processRoundLogFile.php',
-        data: {
-          round: {{round.id}}
-        },
-        method: 'GET'
-      })
-      .done(function(e){
-        console.log(e);
-        $('#logStatus').toggleClass('btn-warning').toggleClass('disabled').toggleClass('btn-success').text('View parsed').attr('data-toggle','tooltip').attr('title',e);
-      })
-    }
-  });
+$.ajax({
+  url: '{{app.url}}api/parsedLogStatus.php',
+  data: { round: {{round.id}} },
+  method: 'GET'
+})
+.done(function(e){
+  if (e){
+    $('#logStatus').toggleClass('btn-warning').toggleClass('disabled').toggleClass('btn-success').text('View parsed');
+  } else {
+    $('#logStatus').text('Parsing...');
+    $.ajax({
+      url: '{{app.url}}api/processRoundLogFile.php',
+      data: { round: {{round.id}} },
+      method: 'GET'
+    })
+    .done(function(e){
+      $('#logStatus').toggleClass('btn-warning').toggleClass('disabled').toggleClass('btn-success').text('View parsed').attr('data-toggle','tooltip').attr('title',e);
+    })
+  }
+});
 </script>
 {% endblock %}

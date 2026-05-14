@@ -1,21 +1,17 @@
 {% extends "base/index.html"%}
+{% block titlebar %}HEADMIN CANDIDATES{% endblock %}
 {% block content %}
 <h2>Candidate Activity</h2>
-<hr>
-<form class="form-inline" method="GET" action="">
-  <div class="form-group">
-    <input type="number" max='180' min='2' class="form-control mx-sm-3" id="interval" placeholder="Days" value="{{interval}}" name="interval">
-    <small class="text-muted">
-      Days
-    </small>
-  </div>
-  <button type="submit" class="btn btn-primary ml-4">View Activity</button>
+
+<form class="pda-admins-form" method="GET" action="">
+  <label class="pda-admins-form__label" for="interval">DAYS</label>
+  <input type="number" max='180' min='2' class="pda-input pda-input--sm" id="interval" placeholder="Days" value="{{interval}}" name="interval">
+  <button type="submit" class="pda-button pda-button--accent">View Activity</button>
 </form>
-<hr>
+
 <p>This page shows the time spent as a ghost and time spent living for the Headmin Candidates listed below, along with the number of times their ckey has connected to the servers.</p>
 
-<hr>
-<table class="table table-sm table-bordered sort">
+<table class="pda-table sort">
   <thead>
     <tr>
       <th>ckey</th>
@@ -30,12 +26,12 @@
         <td>{{a.label|raw}}</td>
         <td>
           {% if a.total %}
-          <div class="progress" style="border: 1px solid black;">
-            <div class="progress-bar" role="progressbar" style="width: {{a.ghost/a.total * 100}}%; background: #EEE;" data-toggle="tooltip" title="Ghost: {{a.ghost}} minutes"></div>
-            <div class="progress-bar" role="progressbar" style="width: {{a.living/a.total * 100}}%; background: #444;" data-toggle="tooltip" title="Living: {{a.living}} minutes"></div>
+          <div class="progress" data-toggle="tooltip" title="Ghost: {{a.ghost}}m / Living: {{a.living}}m">
+            <div class="progress-bar bg-info" role="progressbar" style="width: {{a.ghost/a.total * 100}}%"></div>
+            <div class="progress-bar bg-success" role="progressbar" style="width: {{a.living/a.total * 100}}%"></div>
           </div>
           {% else %}
-          [Data Unavailable]
+          <small class="text-muted">[Data Unavailable]</small>
           {% endif %}
         </td>
         <td>{{a.connections}}</td>
@@ -46,12 +42,15 @@
 </table>
 
 {% if settings.election_officer == user.ckey %}
-<hr>
-<p class="lead">Paste in a list of ckeys to show on the board above. Each ckey should match <code>[a-zA-Z0-9]</code> and should be separated by a comma (<code>,</code>)</p>
-<form class="form" action="{{path_for('election')}}" method="POST">
-<input type='text' class="form-control" name="candidates" value="{{list}}">
-  <hr>
-  <button type="submit" class="btn btn-primary">Update Candidate Listing</button>
-</form>
+<div class="pda-card">
+  <div class="pda-card__title">Election Officer Controls</div>
+  <div class="pda-card__body pda-card__body--padded">
+    <p class="text-muted">Paste in a list of ckeys to show on the board above. Each ckey should match <code>[a-zA-Z0-9]</code> and should be separated by a comma (<code>,</code>)</p>
+    <form action="{{path_for('election')}}" method="POST">
+      <input type='text' class="pda-input" name="candidates" value="{{list}}" style="width: 100%;">
+      <button type="submit" class="pda-button pda-button--accent" style="margin-top: 8px;">Update Candidate Listing</button>
+    </form>
+  </div>
+</div>
 {% endif %}
 {% endblock %}

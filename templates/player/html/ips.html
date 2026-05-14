@@ -1,8 +1,8 @@
-<li class="list-group-item d-flex justify-content-between align-items-center">
+<li class="pda-list-group__item list-group-item pda-id-row">
   <span class="tlp tlp-red">{{ip.real}}</span>
-  <span class='badge badge-pill badge-primary'>{{ip.connections}}</span>
-  <div>
-    <a class="btn btn-primary btn-sm text-white"data-toggle="tooltip" title="Find Bans"><i class="fas fa-ban"></i></a>
-    <a class="btn btn-primary btn-sm text-white" href="{{app.url}}tgdb/player.php?ip={{ip.ip}}"data-toggle="tooltip" title="Find Players"><i class="fas fa-users"></i></a>
+  <span class="pda-tag">{{ip.connections}}</span>
+  <div class="pda-id-row__actions">
+    <a class="pda-button" data-toggle="tooltip" title="Find Bans"><i class="fas fa-ban"></i></a>
+    <a class="pda-button" href="{{app.url}}tgdb/player.php?ip={{ip.ip}}" data-toggle="tooltip" title="Find Players"><i class="fas fa-users"></i></a>
   </div>
 </li>
