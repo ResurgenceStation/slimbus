@@ -648,6 +648,162 @@ body.pda-theme label::before { content: "> "; color: var(--pda-fg-muted); }
     font-weight: 400;
 }
 
+/* ---- breadcrumbs (extension: current/active item styling) ---- */
+.pda-breadcrumbs__current {
+    color: var(--pda-fg-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.pda-breadcrumbs__current::before { content: "["; color: var(--pda-fg-muted); }
+.pda-breadcrumbs__current::after  { content: "]"; color: var(--pda-fg-muted); }
+
+/* ---- top nav (Stage 2 migration target for base/nav.tpl) ----
+ * Horizontal menu bar that sits inside the pda-frame body, under the
+ * statusbar + titlebar. Distinct from .pda-subnav (per-section tabs)
+ * and .pda-frame__statusbar (always-on identity strip).
+ */
+.pda-nav {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: 1em;
+    padding: 0;
+    background: var(--pda-bg-elevated);
+    border: var(--pda-border-width) solid var(--pda-border);
+    font-family: var(--pda-font-mono);
+}
+
+.pda-nav__brand {
+    display: flex;
+    align-items: center;
+    padding: 6px 14px;
+    color: var(--pda-fg-bright);
+    background: var(--pda-bg);
+    border-right: var(--pda-border-width) solid var(--pda-border);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: var(--pda-size-lg);
+    text-shadow: var(--pda-glow);
+}
+.pda-nav__brand:hover {
+    color: var(--pda-accent);
+    background: var(--pda-bg-elevated);
+    text-decoration: none;
+}
+
+.pda-nav__sections {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    align-items: stretch;
+    min-width: 0;
+}
+
+.pda-nav__user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    border-left: var(--pda-border-width) solid var(--pda-border-dim);
+    background: var(--pda-bg);
+    color: var(--pda-fg-muted);
+    font-size: var(--pda-size-sm);
+}
+.pda-nav__user-link {
+    color: var(--pda-fg);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 4px;
+}
+.pda-nav__user-link:hover { color: var(--pda-fg-bright); background: var(--pda-bg-active); }
+.pda-nav__search { margin: 0; }
+.pda-nav__search .pda-input { margin: 0; }
+
+.pda-nav__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    color: var(--pda-fg-dim);
+    background: transparent;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-right: var(--pda-border-width) solid var(--pda-border-dim);
+    white-space: nowrap;
+}
+.pda-nav__item:hover,
+.pda-nav__item:focus {
+    color: var(--pda-fg-bright);
+    background: var(--pda-bg-active);
+    text-decoration: none;
+    outline: none;
+}
+.pda-nav__item--accent { color: var(--pda-accent); }
+.pda-nav__item--accent:hover { color: var(--pda-fg-bright); background: var(--pda-bg-active); }
+.pda-nav__item--danger { color: var(--pda-danger); }
+.pda-nav__item--danger:hover { color: var(--pda-fg-bright); background: var(--pda-danger); }
+
+/* Dropdown wrapper inside the nav -- keeps Bootstrap's data-toggle
+ * behaviour; pda.css's .dropdown-menu rules earlier in this file
+ * supply the open-state appearance. */
+.pda-nav__dropdown {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+.pda-nav__dropdown .dropdown-menu {
+    background: var(--pda-bg-elevated);
+    border: var(--pda-border-width) solid var(--pda-border);
+    border-radius: var(--pda-radius);
+    padding: 4px 0;
+    font-family: var(--pda-font-mono);
+    min-width: 14em;
+}
+.pda-nav__dropdown .dropdown-item {
+    color: var(--pda-fg-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 14px;
+}
+.pda-nav__dropdown .dropdown-item:hover,
+.pda-nav__dropdown .dropdown-item:focus {
+    background: var(--pda-fg);
+    color: var(--pda-bg);
+}
+
+/* Small variant of pda-input for the nav search box. */
+.pda-input--sm,
+body.pda-theme .pda-input--sm {
+    font-size: var(--pda-size-sm);
+    padding: 2px 6px;
+    height: auto;
+    width: 14em;
+    max-width: 100%;
+}
+
+/* Responsive: collapse nav into a wrapping list on narrow screens.
+ * Dropdowns inline directly under their parent on mobile rather than
+ * floating; users tap-toggle them. */
+@media (max-width: 768px) {
+    .pda-nav { flex-direction: column; align-items: stretch; }
+    .pda-nav__brand { border-right: none; border-bottom: var(--pda-border-width) solid var(--pda-border); }
+    .pda-nav__sections { flex-direction: column; }
+    .pda-nav__item {
+        border-right: none;
+        border-bottom: var(--pda-border-width) solid var(--pda-border-dim);
+    }
+    .pda-nav__user {
+        border-left: none;
+        border-top: var(--pda-border-width) solid var(--pda-border-dim);
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+}
+
 
 /* ==========================================================================
  * 7. BOOTSTRAP OVERRIDES
