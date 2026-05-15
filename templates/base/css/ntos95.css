@@ -3,32 +3,76 @@
  *
  * Source: https://github.com/tgstation/tgui-core/blob/main/styles/themes/ntOS95.scss
  *
- * Palette is verbatim from the in-game PDA "Retro" option:
- *   Desktop teal      #008080
- *   Window grey       #bfbfbf
- *   Outline highlight #d9d9d9
- *   Title bar navy    #000080
- *   Title bar text    #ffffff
- *   Status grey       #808080
- *   Body text         #000000
+ * Palette is the in-game PDA "Retro" option with a beige warm tint on the
+ * window chrome (operator preference). Title bar stays navy, content area
+ * is cream instead of grey so inner blocks don't read as "windows inside
+ * windows".
  *
- * Layout discipline: every page is wrapped in a single .win95-window of
- * fixed width (960px) and fixed margin so the chrome never shifts across
- * pages. Vertical content grows the window; horizontal stays locked.
+ *   Desktop teal       #008080
+ *   Window beige-grey  #cac4af  (was #bfbfbf -- warm tinted)
+ *   Frame highlight    #e8e0c9
+ *   Frame shadow       #6a5f4a
+ *   Frame midtone      #948c79
+ *   Title bar navy     #000080
+ *   Title bar text     #ffffff
+ *   Content cream      #f3efe2
+ *   Status grey        #808080
+ *   Body text          #1a1a1a
  *
- * Loads AFTER Bootstrap, so most overrides win on cascade order alone.
- * No transitions, no border-radius, no gradients -- period-accurate.
+ * Two web fonts paired for legibility + character:
+ *   - W95FA (Win95 system-font replica) for chrome and headings
+ *   - IBM Plex Sans (300/400/600/700) for body content
+ * Both fall through to system fonts gracefully if the network call fails.
+ *
+ * Layout: every page wrapped in one 1140px-wide window. Chrome height is
+ * constant across pages, content area grows vertically only.
  * ===================================================================== */
+
+/* ---- W95FA web font (Win95 system-font replica) ---------------------- */
+/* Source: https://github.com/blue-bird1/W95FA (MIT-style free use)        */
+@font-face {
+  font-family: "W95FA";
+  font-style: normal;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/gh/blue-bird1/W95FA@main/W95FA.otf") format("opentype");
+  font-display: swap;
+}
+
+/* ---- palette variables ----------------------------------------------- */
+:root {
+  --w95-desktop:        #008080;
+  --w95-frame:          #cac4af;
+  --w95-frame-hi:       #e8e0c9;
+  --w95-frame-lo:       #6a5f4a;
+  --w95-frame-md:       #948c79;
+  --w95-titlebar:       #000080;
+  --w95-titlebar-text:  #ffffff;
+  --w95-titlebar-off:   #808080;
+  --w95-content-bg:     #f3efe2;
+  --w95-content-text:   #1a1a1a;
+  --w95-link:           #000080;
+  --w95-link-visited:   #4b006e;
+  --w95-link-hover-bg:  #ffff80;
+  --w95-muted:          #4a4a4a;
+  --w95-accent:         #000080;
+  --w95-accent-warm:    #804000;
+  --w95-accent-ok:      #006400;
+  --w95-accent-warn:    #804000;
+  --w95-accent-bad:     #8b0000;
+  --w95-font-chrome:    "W95FA", "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Geneva, sans-serif;
+  --w95-font-body:      "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
+  --w95-font-mono:      "IBM Plex Mono", "Lucida Console", "Courier New", Courier, monospace;
+}
 
 /* ---- root resets ------------------------------------------------------ */
 html, body {
   margin: 0;
   padding: 0;
-  background: #008080;
-  color: #000;
-  font-family: "MS Sans Serif", "Microsoft Sans Serif", "Pixelated MS Sans Serif", Tahoma, sans-serif;
-  font-size: 12px;
-  line-height: 1.3;
+  background: var(--w95-desktop);
+  color: var(--w95-content-text);
+  font-family: var(--w95-font-body);
+  font-size: 13px;
+  line-height: 1.4;
 }
 body {
   min-height: 100vh;
@@ -37,11 +81,8 @@ body {
 * {
   box-sizing: border-box;
 }
-img {
-  image-rendering: pixelated;
-}
 
-/* Kill Bootstrap's rounded everything inside themed pages. */
+/* Kill rounded everything inside themed pages. */
 .win95-window *,
 .win95-window *::before,
 .win95-window *::after {
@@ -52,66 +93,61 @@ img {
 
 /* ---- the window ------------------------------------------------------- */
 .win95-window {
-  width: 960px;
+  width: 1140px;
+  max-width: calc(100vw - 32px);
   margin: 0 auto;
-  background: #bfbfbf;
-  border-top: 2px solid #ffffff;
-  border-left: 2px solid #ffffff;
-  border-right: 2px solid #404040;
-  border-bottom: 2px solid #404040;
+  background: var(--w95-frame);
+  border-top: 2px solid var(--w95-frame-hi);
+  border-left: 2px solid var(--w95-frame-hi);
+  border-right: 2px solid var(--w95-frame-lo);
+  border-bottom: 2px solid var(--w95-frame-lo);
   box-shadow: 1px 1px 0 0 #000;
   padding: 2px;
 }
 
-/* Title bar -- always present, identical height across pages. */
+/* Title bar */
 .win95-titlebar {
-  background: #000080;
-  color: #fff;
+  background: var(--w95-titlebar);
+  color: var(--w95-titlebar-text);
   padding: 3px 4px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-weight: bold;
   user-select: none;
-  font-size: 12px;
+  font-family: var(--w95-font-chrome);
+  font-size: 13px;
 }
 .win95-titlebar__brand {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   overflow: hidden;
   white-space: nowrap;
 }
 .win95-titlebar__brand a {
-  color: #fff;
+  color: var(--w95-titlebar-text);
   text-decoration: none;
 }
-.win95-titlebar__brand a:hover {
-  text-decoration: underline;
-}
+.win95-titlebar__brand a:hover { text-decoration: underline; }
 .win95-titlebar__icon {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  image-rendering: pixelated;
 }
-.win95-titlebar__sep {
-  opacity: 0.7;
-}
-.win95-titlebar__controls {
-  display: flex;
-  gap: 2px;
-  flex-shrink: 0;
-}
+.win95-titlebar__sep { opacity: 0.65; padding: 0 2px; }
+.win95-titlebar__controls { display: flex; gap: 2px; flex-shrink: 0; }
 .win95-titlebar__btn {
   width: 18px;
   height: 16px;
-  background: #bfbfbf;
+  background: var(--w95-frame);
   color: #000;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
-  font-family: "Marlett", "MS Sans Serif", monospace;
+  border-top: 1px solid var(--w95-frame-hi);
+  border-left: 1px solid var(--w95-frame-hi);
+  border-right: 1px solid var(--w95-frame-lo);
+  border-bottom: 1px solid var(--w95-frame-lo);
+  font-family: "Marlett", "W95FA", "MS Sans Serif", monospace;
   font-size: 9px;
   line-height: 14px;
   text-align: center;
@@ -119,40 +155,32 @@ img {
   user-select: none;
 }
 
-/* Menu bar -- functional nav links, Win95 menu hover behaviour. */
+/* Menu bar -- functional nav links, Win95 menu hover behaviour */
 .win95-menubar {
-  background: #bfbfbf;
+  background: var(--w95-frame);
   padding: 2px 4px;
-  border-bottom: 1px solid #808080;
-  font-size: 12px;
+  border-bottom: 1px solid var(--w95-frame-md);
+  font-family: var(--w95-font-chrome);
+  font-size: 13px;
   color: #000;
   display: flex;
   align-items: center;
-  gap: 0;
 }
-.win95-menubar__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 0;
-  flex: 1;
-}
-.win95-menubar__item {
-  position: relative;
-}
+.win95-menubar__list { list-style: none; margin: 0; padding: 0; display: flex; flex: 1; }
+.win95-menubar__item { position: relative; }
 .win95-menubar__link {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px 10px;
   color: #000;
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
 }
+.win95-menubar__link i { margin-right: 4px; }
 .win95-menubar__link:hover,
 .win95-menubar__link:focus,
 .win95-menubar__item:hover > .win95-menubar__link {
-  background: #000080;
+  background: var(--w95-titlebar);
   color: #fff;
   outline: none;
 }
@@ -166,25 +194,20 @@ img {
   top: 100%;
   left: 0;
   z-index: 1000;
-  min-width: 180px;
-  background: #bfbfbf;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
+  min-width: 200px;
+  background: var(--w95-frame);
+  border-top: 1px solid var(--w95-frame-hi);
+  border-left: 1px solid var(--w95-frame-hi);
+  border-right: 1px solid var(--w95-frame-lo);
+  border-bottom: 1px solid var(--w95-frame-lo);
   box-shadow: 1px 1px 0 0 #000;
   padding: 2px;
   margin: 0;
   list-style: none;
 }
 .win95-menubar__item:hover > .win95-menubar__submenu,
-.win95-menubar__item:focus-within > .win95-menubar__submenu {
-  display: block;
-}
-.win95-menubar__submenu .win95-menubar__link {
-  display: block;
-  padding: 2px 16px;
-}
+.win95-menubar__item:focus-within > .win95-menubar__submenu { display: block; }
+.win95-menubar__submenu .win95-menubar__link { display: block; padding: 3px 18px; }
 .win95-menubar__right {
   margin-left: auto;
   display: flex;
@@ -193,78 +216,66 @@ img {
   padding: 0 4px;
   white-space: nowrap;
 }
-.win95-menubar__right a {
-  color: #000;
-  text-decoration: underline;
-}
+.win95-menubar__right a { color: #000; text-decoration: underline; }
 .win95-menubar__badge {
   background: #800000;
   color: #fff;
-  padding: 1px 4px;
+  padding: 1px 5px;
   font-size: 10px;
   font-weight: bold;
   text-decoration: none;
+  font-family: var(--w95-font-chrome);
 }
 
-/* Content area -- inset bevel, all real page output lives here. */
+/* Content area -- inset bevel; CREAM fill so inner blocks don't echo the
+   outer window grey ("no windows inside windows") */
 .win95-content {
-  background: #bfbfbf;
-  border-top: 1px solid #404040;
-  border-left: 1px solid #404040;
-  border-right: 1px solid #ffffff;
-  border-bottom: 1px solid #ffffff;
+  background: var(--w95-content-bg);
+  border-top: 1px solid var(--w95-frame-lo);
+  border-left: 1px solid var(--w95-frame-lo);
+  border-right: 1px solid var(--w95-frame-hi);
+  border-bottom: 1px solid var(--w95-frame-hi);
   margin: 4px;
-  padding: 6px;
-  color: #000;
-  font-size: 12px;
+  padding: 12px 14px;
+  color: var(--w95-content-text);
+  font-family: var(--w95-font-body);
+  font-size: 13px;
 }
 .win95-content h1,
 .win95-content h2,
 .win95-content h3,
-.win95-content h4,
-.win95-content h5,
-.win95-content h6 {
-  font-family: inherit;
+.win95-content h4 {
+  font-family: var(--w95-font-chrome);
   font-weight: bold;
-  margin: 8px 0 4px;
-  color: #000;
+  margin: 10px 0 6px;
+  color: var(--w95-content-text);
 }
-.win95-content h1 { font-size: 18px; }
-.win95-content h2 { font-size: 15px; }
-.win95-content h3 { font-size: 13px; }
-.win95-content h4 { font-size: 12px; }
-.win95-content p {
-  margin: 0 0 6px;
-}
+.win95-content h1 { font-size: 20px; }
+.win95-content h2 { font-size: 16px; }
+.win95-content h3 { font-size: 14px; }
+.win95-content h4 { font-size: 13px; }
+.win95-content p { margin: 0 0 6px; }
 .win95-content hr {
   border: 0;
-  border-top: 1px solid #404040;
-  border-bottom: 1px solid #ffffff;
-  margin: 6px 0;
+  border-top: 1px solid var(--w95-frame-md);
+  margin: 8px 0;
 }
-.win95-content a {
-  color: #000080;
-}
-.win95-content a:visited {
-  color: #4b006e;
-}
-.win95-content a:hover {
-  color: #000080;
-  background: #ffff80;
-}
+.win95-content a { color: var(--w95-link); }
+.win95-content a:visited { color: var(--w95-link-visited); }
+.win95-content a:hover { background: var(--w95-link-hover-bg); }
 .win95-content code,
 .win95-content samp,
 .win95-content pre {
-  font-family: "Lucida Console", "Courier New", Courier, monospace;
+  font-family: var(--w95-font-mono);
   font-size: 12px;
-  color: #000;
 }
 
-/* Status bar at the bottom of every window. */
+/* Status bar */
 .win95-statusbar {
-  background: #bfbfbf;
-  border-top: 1px solid #ffffff;
+  background: var(--w95-frame);
+  border-top: 1px solid var(--w95-frame-hi);
   padding: 3px 6px;
+  font-family: var(--w95-font-chrome);
   font-size: 12px;
   color: #000;
   display: flex;
@@ -274,53 +285,57 @@ img {
   gap: 8px;
 }
 .win95-statusbar__cell {
-  padding: 1px 6px;
-  border-top: 1px solid #404040;
-  border-left: 1px solid #404040;
-  border-right: 1px solid #ffffff;
-  border-bottom: 1px solid #ffffff;
-  min-width: 40px;
+  padding: 1px 8px;
+  border-top: 1px solid var(--w95-frame-lo);
+  border-left: 1px solid var(--w95-frame-lo);
+  border-right: 1px solid var(--w95-frame-hi);
+  border-bottom: 1px solid var(--w95-frame-hi);
+  min-width: 60px;
 }
 
-/* ---- sections (grouped blocks inside content) ------------------------- */
+/* ---- sections (NOT nested-window; flat blocks with a heading rule) ---- */
 .win95-section {
-  background: #bfbfbf;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
-  margin: 0 0 6px;
+  background: transparent;
+  border: 0;
+  margin: 0 0 16px;
   padding: 0;
 }
 .win95-section__title {
-  background: #000080;
-  color: #fff;
+  background: transparent;
+  color: var(--w95-content-text);
+  font-family: var(--w95-font-chrome);
+  font-size: 14px;
   font-weight: bold;
-  padding: 2px 6px;
-  margin: 0;
-  font-size: 12px;
+  padding: 4px 0;
+  margin: 0 0 8px;
+  border-bottom: 2px solid var(--w95-frame-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
+.win95-section__title::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 14px;
+  background: var(--w95-titlebar);
+  margin-right: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
 .win95-section__title small {
   font-weight: normal;
   font-size: 11px;
-  color: #c0c0c0;
+  color: var(--w95-muted);
+  font-family: var(--w95-font-body);
 }
-.win95-section__body {
-  padding: 6px;
-}
-.win95-section--inactive > .win95-section__title {
-  background: #808080;
-}
+.win95-section__body { padding: 0; }
+.win95-section--inactive .win95-section__title::before { background: var(--w95-frame-md); }
+.win95-section--inactive .win95-section__title { color: var(--w95-muted); }
 
-/* Two- and three-column grids inside content. */
-.win95-grid {
-  display: grid;
-  gap: 6px;
-}
+/* Grids */
+.win95-grid { display: grid; gap: 10px; }
 .win95-grid--2 { grid-template-columns: 1fr 1fr; }
 .win95-grid--3 { grid-template-columns: 1fr 1fr 1fr; }
 .win95-grid--auto { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
@@ -329,68 +344,59 @@ img {
 .win95-table {
   width: 100%;
   border-collapse: collapse;
-  background: #bfbfbf;
-  font-size: 12px;
-  color: #000;
+  background: transparent;
+  font-family: var(--w95-font-body);
+  font-size: 13px;
+  color: var(--w95-content-text);
 }
 .win95-table thead th {
-  background: #c0c0c0;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
-  padding: 1px 6px;
+  background: var(--w95-frame);
+  border-top: 1px solid var(--w95-frame-hi);
+  border-left: 1px solid var(--w95-frame-hi);
+  border-right: 1px solid var(--w95-frame-lo);
+  border-bottom: 1px solid var(--w95-frame-lo);
+  padding: 2px 8px;
   text-align: left;
+  font-family: var(--w95-font-chrome);
   font-weight: bold;
   white-space: nowrap;
 }
 .win95-table tbody td {
-  padding: 1px 6px;
-  border-right: 1px solid #a0a0a0;
-  border-bottom: 1px solid #a0a0a0;
+  padding: 2px 8px;
+  border-right: 1px solid #d6d1bf;
+  border-bottom: 1px solid #d6d1bf;
   vertical-align: middle;
 }
-.win95-table tbody tr:hover td {
-  background: #000080;
-  color: #fff;
-}
-.win95-table tbody tr:hover td a {
-  color: #fff;
-}
-.win95-table--keyvalue {
-  width: 100%;
-}
+.win95-table tbody tr:nth-child(even) td { background: #ece6d5; }
+.win95-table tbody tr:hover td { background: var(--w95-titlebar); color: #fff; }
+.win95-table tbody tr:hover td a,
+.win95-table tbody tr:hover td i { color: #fff; }
 .win95-table--keyvalue th {
-  background: #bfbfbf;
+  background: transparent;
   text-align: right;
   font-weight: bold;
-  padding: 2px 8px;
+  padding: 3px 10px;
   white-space: nowrap;
   border: 0;
+  border-bottom: 1px dotted var(--w95-frame-md);
   width: 1%;
+  font-family: var(--w95-font-chrome);
 }
 .win95-table--keyvalue td {
-  padding: 2px 8px;
+  padding: 3px 10px;
   border: 0;
+  border-bottom: 1px dotted var(--w95-frame-md);
 }
+.win95-table--keyvalue tbody tr:nth-child(even) td,
 .win95-table--keyvalue tbody tr:hover td {
   background: transparent;
   color: inherit;
 }
+.win95-table--keyvalue tbody tr:hover td a { color: var(--w95-link); }
 .win95-table--compact tbody td,
-.win95-table--compact thead th {
-  padding: 0 4px;
-}
+.win95-table--compact thead th { padding: 1px 6px; }
 
-/* Row state colouring -- matches Bootstrap's table-warning/info/etc that
-   the existing templates already pass through round.class. */
-.win95-table tbody tr.win95-row--info    td { background: #cce5ff; }
-.win95-table tbody tr.win95-row--success td { background: #d4edda; }
-.win95-table tbody tr.win95-row--warning td { background: #fff3cd; }
-.win95-table tbody tr.win95-row--danger  td { background: #f8d7da; }
-.win95-table tbody tr.win95-row--muted   td { color: #404040; font-style: italic; }
-/* Bootstrap-class passthrough -- the row's existing class still triggers
-   the right tint without templates having to be updated. */
+/* Bootstrap row-class passthrough for state colouring */
 .win95-table tbody tr.table-info    td,
 .win95-table tbody tr.table-primary td { background: #cce5ff; }
 .win95-table tbody tr.table-success td { background: #d4edda; }
@@ -398,77 +404,89 @@ img {
 .win95-table tbody tr.table-danger  td { background: #f8d7da; }
 .win95-table tbody tr.table-secondary td { background: #e2e3e5; }
 
-/* ---- buttons ---------------------------------------------------------- */
+/* ---- KPI cards (home page) ------------------------------------------- */
+.win95-kpi {
+  background: #fffaec;
+  border-top: 1px solid var(--w95-frame-lo);
+  border-left: 1px solid var(--w95-frame-lo);
+  border-right: 1px solid var(--w95-frame-hi);
+  border-bottom: 1px solid var(--w95-frame-hi);
+  padding: 12px 14px;
+  text-align: center;
+  font-family: var(--w95-font-body);
+}
+.win95-kpi__label {
+  font-size: 11px;
+  color: var(--w95-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.win95-kpi__value {
+  font-family: var(--w95-font-chrome);
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--w95-titlebar);
+  margin: 4px 0 2px;
+  line-height: 1.1;
+}
+.win95-kpi__sub {
+  font-size: 12px;
+  color: var(--w95-content-text);
+}
+.win95-kpi__sub a { font-weight: 600; }
+
+/* ---- buttons (Win95 chunky) ------------------------------------------ */
 .win95-button,
 .win95-content .btn,
 .win95-content button {
   display: inline-block;
-  background: #bfbfbf;
+  background: var(--w95-frame);
   color: #000;
-  padding: 2px 10px;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
+  padding: 3px 12px;
+  border-top: 1px solid var(--w95-frame-hi);
+  border-left: 1px solid var(--w95-frame-hi);
+  border-right: 1px solid var(--w95-frame-lo);
+  border-bottom: 1px solid var(--w95-frame-lo);
   text-decoration: none;
-  font: inherit;
+  font-family: var(--w95-font-chrome);
   font-size: 12px;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
-  min-width: 75px;
+  min-width: 78px;
   text-align: center;
-  outline: 1px solid transparent;
 }
 .win95-button:hover,
 .win95-content .btn:hover,
-.win95-content button:hover {
-  background: #bfbfbf;
-  color: #000;
-  text-decoration: none;
-}
+.win95-content button:hover { background: var(--w95-frame); text-decoration: none; }
 .win95-button:active,
 .win95-content .btn:active,
 .win95-content button:active,
 .win95-button.is-active,
 .win95-content .btn.active {
-  border-top: 1px solid #404040;
-  border-left: 1px solid #404040;
-  border-right: 1px solid #ffffff;
-  border-bottom: 1px solid #ffffff;
-  padding: 3px 9px 1px 11px;
+  border-top: 1px solid var(--w95-frame-lo);
+  border-left: 1px solid var(--w95-frame-lo);
+  border-right: 1px solid var(--w95-frame-hi);
+  border-bottom: 1px solid var(--w95-frame-hi);
+  padding: 4px 11px 2px 13px;
 }
 .win95-button:focus,
 .win95-content .btn:focus,
-.win95-content button:focus {
-  outline: 1px dotted #000;
-  outline-offset: -3px;
-}
+.win95-content button:focus { outline: 1px dotted #000; outline-offset: -4px; }
 .win95-button--sm {
-  padding: 1px 6px;
+  padding: 1px 8px;
   min-width: 0;
   font-size: 11px;
 }
-.win95-button--block {
-  display: block;
-  width: 100%;
-}
-.win95-button[disabled],
-.win95-content .btn[disabled],
-.win95-content button[disabled] {
-  color: #808080;
-  text-shadow: 1px 1px 0 #fff;
-  cursor: not-allowed;
-}
+.win95-button i { margin-right: 4px; }
 
-/* Map common Bootstrap button colour variants to the flat Win95 look but
-   keep a colour cue so the templates still communicate intent. */
-.win95-content .btn-primary   { background: #bfbfbf; color: #000080; font-weight: bold; }
-.win95-content .btn-secondary { background: #bfbfbf; color: #404040; }
-.win95-content .btn-success   { background: #bfbfbf; color: #006400; font-weight: bold; }
-.win95-content .btn-warning   { background: #bfbfbf; color: #804000; font-weight: bold; }
-.win95-content .btn-danger    { background: #bfbfbf; color: #800000; font-weight: bold; }
-.win95-content .btn-info      { background: #bfbfbf; color: #004080; }
+.win95-content .btn-primary   { color: var(--w95-titlebar); font-weight: bold; }
+.win95-content .btn-secondary { color: var(--w95-muted); }
+.win95-content .btn-success   { color: var(--w95-accent-ok); font-weight: bold; }
+.win95-content .btn-warning   { color: var(--w95-accent-warn); font-weight: bold; }
+.win95-content .btn-danger    { color: var(--w95-accent-bad); font-weight: bold; }
+.win95-content .btn-info      { color: #004080; }
 .win95-content .btn-sm        { padding: 1px 6px; min-width: 0; font-size: 11px; }
 
 /* ---- pagination ------------------------------------------------------- */
@@ -476,81 +494,52 @@ img {
   display: flex;
   align-items: center;
   gap: 2px;
-  margin: 4px 0;
+  margin: 6px 0;
   list-style: none;
   padding: 0;
+  font-family: var(--w95-font-chrome);
 }
 .win95-pagination__item .win95-pagination__link {
   display: inline-block;
-  min-width: 26px;
-  padding: 1px 6px;
+  min-width: 28px;
+  padding: 1px 8px;
   text-align: center;
-  background: #bfbfbf;
+  background: var(--w95-frame);
   color: #000;
   text-decoration: none;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
+  border-top: 1px solid var(--w95-frame-hi);
+  border-left: 1px solid var(--w95-frame-hi);
+  border-right: 1px solid var(--w95-frame-lo);
+  border-bottom: 1px solid var(--w95-frame-lo);
   font-size: 12px;
 }
 .win95-pagination__item--active .win95-pagination__link {
-  border-top: 1px solid #404040;
-  border-left: 1px solid #404040;
-  border-right: 1px solid #ffffff;
-  border-bottom: 1px solid #ffffff;
+  border-top: 1px solid var(--w95-frame-lo);
+  border-left: 1px solid var(--w95-frame-lo);
+  border-right: 1px solid var(--w95-frame-hi);
+  border-bottom: 1px solid var(--w95-frame-hi);
   font-weight: bold;
 }
-.win95-pagination__sep {
-  padding: 0 4px;
-  color: #404040;
-}
+.win95-pagination__sep { padding: 0 4px; color: var(--w95-muted); }
 
-/* ---- breadcrumbs (rendered in title bar, kept here for fallback) ------ */
-.win95-breadcrumbs {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  font-size: 12px;
-}
-.win95-breadcrumbs li::after {
-  content: " \\ ";
-  padding: 0 4px;
-  opacity: 0.7;
-}
-.win95-breadcrumbs li:last-child::after {
-  content: "";
-}
-.win95-breadcrumbs li,
-.win95-breadcrumbs li a {
-  color: inherit;
-  text-decoration: none;
-}
-.win95-breadcrumbs li a:hover {
-  text-decoration: underline;
-}
-
-/* ---- alerts (Bootstrap passthrough recoloured) ------------------------ */
+/* ---- alerts ---------------------------------------------------------- */
 .win95-content .alert {
-  background: #bfbfbf;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
-  padding: 4px 8px;
-  margin: 0 0 6px;
-  color: #000;
+  background: #fffaec;
+  border-top: 1px solid var(--w95-frame-lo);
+  border-left: 1px solid var(--w95-frame-lo);
+  border-right: 1px solid var(--w95-frame-hi);
+  border-bottom: 1px solid var(--w95-frame-hi);
+  padding: 6px 10px;
+  margin: 0 0 8px;
+  color: var(--w95-content-text);
   font-size: 12px;
 }
-.win95-content .alert-warning { color: #804000; }
-.win95-content .alert-danger  { color: #800000; }
-.win95-content .alert-success { color: #006400; }
+.win95-content .alert-warning { color: var(--w95-accent-warn); }
+.win95-content .alert-danger  { color: var(--w95-accent-bad); }
+.win95-content .alert-success { color: var(--w95-accent-ok); }
 .win95-content .alert-info    { color: #004080; }
 
-/* ---- forms (Bootstrap form-control passthrough) ----------------------- */
+/* ---- forms ------------------------------------------------------------ */
 .win95-content .form-control,
 .win95-content input[type="text"],
 .win95-content input[type="search"],
@@ -560,91 +549,93 @@ img {
 .win95-content textarea,
 .win95-content select {
   background: #fff;
-  color: #000;
-  border-top: 1px solid #404040;
-  border-left: 1px solid #404040;
-  border-right: 1px solid #ffffff;
-  border-bottom: 1px solid #ffffff;
-  outline: 1px solid #808080;
-  padding: 2px 4px;
+  color: var(--w95-content-text);
+  border-top: 1px solid var(--w95-frame-lo);
+  border-left: 1px solid var(--w95-frame-lo);
+  border-right: 1px solid var(--w95-frame-hi);
+  border-bottom: 1px solid var(--w95-frame-hi);
+  outline: 1px solid var(--w95-frame-md);
+  padding: 2px 6px;
   font: inherit;
+  font-family: var(--w95-font-body);
 }
 
-/* ---- Bootstrap layout-class passthrough ------------------------------- */
-/* keep the .row/.col grids working inside themed content, but flat */
-.win95-content .row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -3px;
-}
+/* ---- Bootstrap row/col passthrough inside themed content -------------- */
+.win95-content .row { display: flex; flex-wrap: wrap; margin: 0 -5px; }
 .win95-content .col,
-.win95-content [class*="col-"] {
-  padding: 0 3px;
-  flex: 1;
-  min-width: 0;
-}
+.win95-content [class*="col-"] { padding: 0 5px; flex: 1; min-width: 0; }
 
-/* ---- jumbotron (used on home page) ------------------------------------ */
-.win95-content .jumbotron {
-  background: #bfbfbf;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
-  padding: 8px 10px;
-  margin: 0;
-  text-align: center;
+/* ---- chart containers (Chart.js / ApexCharts / Plotly) --------------- */
+/* Keep every chart inside the window: limit to the content area's box. */
+.win95-content canvas,
+.win95-content svg,
+.win95-content .apexcharts-canvas,
+.win95-content #population,
+.win95-content #minutes,
+.win95-content [id^="chart-"],
+.win95-content [id^="plot-"] {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
 }
-.win95-content .jumbotron h2,
-.win95-content .jumbotron .display-4 {
-  font-family: "Lucida Console", "Courier New", Courier, monospace;
-  font-size: 32px;
-  font-weight: bold;
-  margin: 4px 0;
+.win95-content #population,
+.win95-content #minutes {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow: hidden;
 }
-.win95-content .jumbotron .text-muted {
-  color: #404040;
-}
-.win95-content .jumbotron small {
-  font-size: 11px;
-}
+/* Keep ApexCharts toolbar/tooltips inside the window */
+.win95-content .apexcharts-toolbar,
+.win95-content .apexcharts-menu,
+.win95-content .apexcharts-tooltip { max-width: 100%; }
 
-/* ---- footer (legacy, kept compact) ------------------------------------ */
+/* ---- footer ---------------------------------------------------------- */
 .win95-footer {
-  width: 960px;
+  width: 1140px;
+  max-width: calc(100vw - 32px);
   margin: 6px auto 0;
-  padding: 4px 6px;
-  background: #bfbfbf;
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
+  padding: 5px 8px;
+  background: var(--w95-frame);
+  border-top: 1px solid var(--w95-frame-hi);
+  border-left: 1px solid var(--w95-frame-hi);
+  border-right: 1px solid var(--w95-frame-lo);
+  border-bottom: 1px solid var(--w95-frame-lo);
+  font-family: var(--w95-font-chrome);
   font-size: 11px;
   color: #000;
   display: flex;
   justify-content: space-between;
   gap: 8px;
 }
-.win95-footer .text-muted {
-  color: #404040;
-}
+.win95-footer .text-muted { color: var(--w95-muted); }
 
-/* ---- utility ---------------------------------------------------------- */
-.win95-spacer { height: 6px; }
+/* ---- utility --------------------------------------------------------- */
 .win95-flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.win95-muted { color: #404040; }
-.win95-mono  { font-family: "Lucida Console", "Courier New", Courier, monospace; }
+.win95-flex-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.win95-muted { color: var(--w95-muted); }
+.win95-mono  { font-family: var(--w95-font-mono); }
 .win95-nowrap { white-space: nowrap; }
 .win95-right  { text-align: right; }
 .win95-center { text-align: center; }
+.win95-block  { display: block; }
+.win95-inline { display: inline-block; }
 
 /* Hide the legacy floating Bootstrap nav -- the menubar replaces it. */
 .win95-window .navbar.fixed-top,
-body > .navbar.fixed-top {
-  display: none;
-}
+body > .navbar.fixed-top { display: none; }
 
-/* Hide Bootstrap default body padding-top that compensated for fixed nav. */
-body {
-  padding-top: 24px !important;
+/* Reset body padding-top that compensated for the fixed Bootstrap nav. */
+body { padding-top: 24px !important; }
+
+/* ---- icon sizing (FontAwesome) --------------------------------------- */
+.win95-content .fa,
+.win95-content .fas,
+.win95-content .far,
+.win95-content .fab {
+  font-size: 12px;
+  vertical-align: -1px;
 }
+.win95-titlebar .fa,
+.win95-titlebar .fas,
+.win95-menubar .fa,
+.win95-menubar .fas { font-size: 11px; vertical-align: -1px; }

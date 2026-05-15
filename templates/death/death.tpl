@@ -84,7 +84,7 @@
       <i class="fas fa-circle"></i> {{death.round}}</a>
         </small>
       </div>
-      <a class="btn btn-primary btn-sm" href="https://demo.hippiestation.com/?demo_url=https://logs.hippiestation.com/hippie_station/data/logs/{{death.demo_round_date}}/round-{{death.round_id}}/demo.txt.gz#{{death.ticktod}};{{death.x}}.50;{{death.y}}.50;{{death.x}},{{death.y}},{{death.z}};{{death.byondkey}}" target="_blank" rel="noopener noreferrer">Watch Replay <i class="fas fa-external-link-alt"></i></a>
+      <a class="btn btn-primary btn-sm" href="https://demo.owo.fm/?demo_url=https://logs.owo.fm/hippie_station/data/logs/{{death.demo_round_date}}/round-{{death.round_id}}/demo.txt.gz#{{death.ticktod}};{{death.x}}.50;{{death.y}}.50;{{death.x}},{{death.y}},{{death.z}};{{death.byondkey}}" target="_blank" rel="noopener noreferrer">Watch Replay <i class="fas fa-external-link-alt"></i></a>
     </div>
   </div>
 </div>
