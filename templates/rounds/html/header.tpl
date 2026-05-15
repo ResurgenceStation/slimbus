@@ -1,39 +1,34 @@
-{# PDA-themed round detail header (Stage 3 migration).
-   Replaces the Bootstrap row/col layout with a pda-card laid out
-   like a PDA "session info" header: identifier on the left,
-   primary status in the middle, secondary metadata on the right.
-   Three-tier end-time display (Stage 0) preserved. #}
-<div class="pda-card pda-round-header">
-  <div class="pda-round-header__id">
-    <i class="fas fa-circle"></i> ROUND #{{round.id}}
-    <div class="pda-round-header__map"><small>{{round.map}}</small></div>
+<div class="win95-section">
+  <div class="win95-section__title">
+    <span>Round #{{round.id}} &middot; {{round.map}}</span>
+    <small>{{round.server}}</small>
   </div>
-
-  <div class="pda-round-header__status">
-    <div class="pda-round-header__mode">
-      <i class="fas fa-{{round.icons.mode}}"></i> {{round.mode|upper}}
+  <div class="win95-section__body">
+    <div class="win95-grid win95-grid--3">
+      <div>
+        <div class="win95-muted"><small>Mode</small></div>
+        <div><strong>{{round.mode}}</strong></div>
+      </div>
+      <div class="win95-center">
+        <div class="win95-muted"><small>Result</small></div>
+        <div><strong>{{round.result}}</strong></div>
+      </div>
+      <div class="win95-right">
+        <div class="win95-muted"><small>Duration</small></div>
+        <div><strong>{{round.duration}}</strong></div>
+      </div>
     </div>
-    <div class="pda-round-header__result">
-      <span class="pda-tag pda-tag--{{round.class == 'danger' ? 'err' : (round.class == 'warning' ? 'warn' : 'ok')}}">
-        <i class="fas fa-{{round.icons.result}}"></i> {{round.result|upper}}
-      </span>
+    <hr>
+    <div class="win95-mono" style="font-size:11px;">
+      <strong>Started</strong> {{round.start_datetime}}
+      {# Three-tier end-time display, matching upstream Statbus. #}
+      {% if round.end_datetime and round.shutdown_datetime %}
+        &middot; <strong>Ended</strong> {{round.end_datetime}} <span class="win95-muted">(Shutdown {{round.shutdown_datetime}})</span>
+      {% elseif round.shutdown_datetime %}
+        &middot; <strong>Shutdown</strong> {{round.shutdown_datetime}}
+      {% else %}
+        &middot; <span class="win95-muted">Server crashed &mdash; no end timings</span>
+      {% endif %}
     </div>
-    <div class="pda-round-header__timing">
-      <small>
-        Started {{round.start_datetime}},
-        {% if round.end_datetime and round.shutdown_datetime %}
-          Ended {{round.end_datetime}} (Shutdown: {{round.shutdown_datetime}})
-        {% elseif round.shutdown_datetime %}
-          Shutdown {{round.shutdown_datetime}}
-        {% else %}
-          <span class="pda-tag pda-tag--err">Server crashed - No end timings</span>
-        {% endif %}
-      </small>
-    </div>
-  </div>
-
-  <div class="pda-round-header__meta">
-    <div class="pda-round-header__server">{{round.server}}</div>
-    <div class="pda-round-header__duration">{{round.duration}}</div>
   </div>
 </div>

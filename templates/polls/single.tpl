@@ -1,51 +1,48 @@
 {% extends "index.tpl"%}
-{% block titlebar %}POLL #{{poll.id}}{% endblock %}
 {% block content%}
-<h4>
-  <small class="text-muted">#{{poll.id}} {{poll.createdby_ckey}} asks:</small><br>
-  {{poll.question|nl2br}}
-</h4>
+<h4><small class="text-muted">#{{poll.id}} {{poll.createdby_ckey}} asks:</small><br>
+  {{poll.question|nl2br}}</h4>
+<hr>
 
-<div class="pda-poll-meta">
-  <div class="pda-poll-meta__cell">
-    <strong>Started</strong>
-    <div class="pda-readout">{{poll.starttime|timestamp|raw}}</div>
+<div class="row mb-4">
+  <div class="col text-right lead">
+    <strong>Started</strong><br>
+    {{poll.starttime|timestamp|raw}}
   </div>
-  <div class="pda-poll-meta__cell">
-    <strong>Duration</strong>
-    <div class="pda-readout">{{poll.duration}}</div>
+  <div class="col text-center lead">
+    <strong>Duration</strong><br>
+    {{poll.duration}}
   </div>
-  <div class="pda-poll-meta__cell">
-    <strong>Responses</strong>
-    <div class="pda-readout">
-      {{poll.totalVotes}}
-      {% if poll.filtered %}
-      <br><small>Does NOT reflect filtered votes!</small>
-      {% endif %}
-    </div>
+  <div class="col lead text-center">
+    <strong>Responses</strong><br>
+    {{poll.totalVotes}}
+    {% if poll.filtered %}
+    <br><small>Does NOT reflect filtered votes!</small>
+    {% endif %}
   </div>
-  <div class="pda-poll-meta__cell">
-    <strong>Ended</strong>
-    <div class="pda-readout">{{poll.endtime|timestamp|raw}}</div>
+  <div class="col lead">
+    <strong>Ended</strong><br>
+    {{poll.endtime|timestamp|raw}}
   </div>
 </div>
-
 {% if poll.ended %}
-<div class="pda-alert pda-alert--info">This poll has ended</div>
+<div class="alert alert-info">This poll has ended</div>
 {% endif %}
 
 {% if poll.filtered %}
-<div class="pda-alert pda-alert--err"><strong>VIEWING FILTERED RESULTS</strong></div>
+<div class="alert alert-danger"><strong>VIEWING FILTERED RESULTS</strong></div>
 {% endif %}
+<hr>
 
 {% if poll.polltype == 'TEXT' %}
   {% include 'polls/types/text.tpl' %}
 {% elseif poll.polltype == 'MULTICHOICE' %}
-  {% include 'polls/types/option.tpl' %}
+  {% include 'polls/types/option.tpl' %}  
 {% elseif poll.polltype == 'OPTION' %}
-  {% include 'polls/types/option.tpl' %}
+  {% include 'polls/types/option.tpl' %}  
 {% elseif poll.polltype == 'IRV' %}
-  {% include 'polls/types/irv.tpl' %}
+  {% include 'polls/types/irv.tpl' %}  
 {% endif %}
+
 
 {% endblock %}

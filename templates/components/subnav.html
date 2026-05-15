@@ -1,15 +1,5 @@
-{# PDA-themed subnav tabs (Stage 2 migration).
-
-   Renders the per-section tab row (e.g. on a round detail page:
-   Round / Logs / Map / Manifest / Newscaster). The currently-active
-   tab gets the pda-subnav__item--current class which inverts colours
-   so it reads as "you are here" in the PDA visual language.
-
-   Loop input: `nav` is an associative array { 'Tab Label' => 'url' }.
-#}
-<nav class="pda-subnav" aria-label="section navigation">
+<nav class="nav nav-tabs mb-5">
   {% for n, u in nav %}
-    <a class="pda-subnav__item{% if u == app.currentURL %} pda-subnav__item--current{% endif %}"
-       href="{{u}}">{{n}}</a>
+    <a class="nav-item nav-link{% if u == app.currentURL %} active {% endif %}" href="{{u}}">{{n}}</a>
   {% endfor %}
 </nav>

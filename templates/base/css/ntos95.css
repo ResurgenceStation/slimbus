@@ -1,0 +1,650 @@
+/* =====================================================================
+ * ntos95.css -- Retro PDA theme port of tgstation tgui-core .theme-ntOS95
+ *
+ * Source: https://github.com/tgstation/tgui-core/blob/main/styles/themes/ntOS95.scss
+ *
+ * Palette is verbatim from the in-game PDA "Retro" option:
+ *   Desktop teal      #008080
+ *   Window grey       #bfbfbf
+ *   Outline highlight #d9d9d9
+ *   Title bar navy    #000080
+ *   Title bar text    #ffffff
+ *   Status grey       #808080
+ *   Body text         #000000
+ *
+ * Layout discipline: every page is wrapped in a single .win95-window of
+ * fixed width (960px) and fixed margin so the chrome never shifts across
+ * pages. Vertical content grows the window; horizontal stays locked.
+ *
+ * Loads AFTER Bootstrap, so most overrides win on cascade order alone.
+ * No transitions, no border-radius, no gradients -- period-accurate.
+ * ===================================================================== */
+
+/* ---- root resets ------------------------------------------------------ */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #008080;
+  color: #000;
+  font-family: "MS Sans Serif", "Microsoft Sans Serif", "Pixelated MS Sans Serif", Tahoma, sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+}
+body {
+  min-height: 100vh;
+  padding: 24px 0 32px;
+}
+* {
+  box-sizing: border-box;
+}
+img {
+  image-rendering: pixelated;
+}
+
+/* Kill Bootstrap's rounded everything inside themed pages. */
+.win95-window *,
+.win95-window *::before,
+.win95-window *::after {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+/* ---- the window ------------------------------------------------------- */
+.win95-window {
+  width: 960px;
+  margin: 0 auto;
+  background: #bfbfbf;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: 1px 1px 0 0 #000;
+  padding: 2px;
+}
+
+/* Title bar -- always present, identical height across pages. */
+.win95-titlebar {
+  background: #000080;
+  color: #fff;
+  padding: 3px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  user-select: none;
+  font-size: 12px;
+}
+.win95-titlebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.win95-titlebar__brand a {
+  color: #fff;
+  text-decoration: none;
+}
+.win95-titlebar__brand a:hover {
+  text-decoration: underline;
+}
+.win95-titlebar__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.win95-titlebar__sep {
+  opacity: 0.7;
+}
+.win95-titlebar__controls {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.win95-titlebar__btn {
+  width: 18px;
+  height: 16px;
+  background: #bfbfbf;
+  color: #000;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  font-family: "Marlett", "MS Sans Serif", monospace;
+  font-size: 9px;
+  line-height: 14px;
+  text-align: center;
+  cursor: default;
+  user-select: none;
+}
+
+/* Menu bar -- functional nav links, Win95 menu hover behaviour. */
+.win95-menubar {
+  background: #bfbfbf;
+  padding: 2px 4px;
+  border-bottom: 1px solid #808080;
+  font-size: 12px;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.win95-menubar__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 0;
+  flex: 1;
+}
+.win95-menubar__item {
+  position: relative;
+}
+.win95-menubar__link {
+  display: inline-block;
+  padding: 2px 8px;
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.win95-menubar__link:hover,
+.win95-menubar__link:focus,
+.win95-menubar__item:hover > .win95-menubar__link {
+  background: #000080;
+  color: #fff;
+  outline: none;
+}
+.win95-menubar__link[aria-haspopup="true"]::after {
+  content: " \25BE";
+  font-size: 9px;
+}
+.win95-menubar__submenu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 180px;
+  background: #bfbfbf;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  box-shadow: 1px 1px 0 0 #000;
+  padding: 2px;
+  margin: 0;
+  list-style: none;
+}
+.win95-menubar__item:hover > .win95-menubar__submenu,
+.win95-menubar__item:focus-within > .win95-menubar__submenu {
+  display: block;
+}
+.win95-menubar__submenu .win95-menubar__link {
+  display: block;
+  padding: 2px 16px;
+}
+.win95-menubar__right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+.win95-menubar__right a {
+  color: #000;
+  text-decoration: underline;
+}
+.win95-menubar__badge {
+  background: #800000;
+  color: #fff;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* Content area -- inset bevel, all real page output lives here. */
+.win95-content {
+  background: #bfbfbf;
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  margin: 4px;
+  padding: 6px;
+  color: #000;
+  font-size: 12px;
+}
+.win95-content h1,
+.win95-content h2,
+.win95-content h3,
+.win95-content h4,
+.win95-content h5,
+.win95-content h6 {
+  font-family: inherit;
+  font-weight: bold;
+  margin: 8px 0 4px;
+  color: #000;
+}
+.win95-content h1 { font-size: 18px; }
+.win95-content h2 { font-size: 15px; }
+.win95-content h3 { font-size: 13px; }
+.win95-content h4 { font-size: 12px; }
+.win95-content p {
+  margin: 0 0 6px;
+}
+.win95-content hr {
+  border: 0;
+  border-top: 1px solid #404040;
+  border-bottom: 1px solid #ffffff;
+  margin: 6px 0;
+}
+.win95-content a {
+  color: #000080;
+}
+.win95-content a:visited {
+  color: #4b006e;
+}
+.win95-content a:hover {
+  color: #000080;
+  background: #ffff80;
+}
+.win95-content code,
+.win95-content samp,
+.win95-content pre {
+  font-family: "Lucida Console", "Courier New", Courier, monospace;
+  font-size: 12px;
+  color: #000;
+}
+
+/* Status bar at the bottom of every window. */
+.win95-statusbar {
+  background: #bfbfbf;
+  border-top: 1px solid #ffffff;
+  padding: 3px 6px;
+  font-size: 12px;
+  color: #000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+  gap: 8px;
+}
+.win95-statusbar__cell {
+  padding: 1px 6px;
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  min-width: 40px;
+}
+
+/* ---- sections (grouped blocks inside content) ------------------------- */
+.win95-section {
+  background: #bfbfbf;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  margin: 0 0 6px;
+  padding: 0;
+}
+.win95-section__title {
+  background: #000080;
+  color: #fff;
+  font-weight: bold;
+  padding: 2px 6px;
+  margin: 0;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.win95-section__title small {
+  font-weight: normal;
+  font-size: 11px;
+  color: #c0c0c0;
+}
+.win95-section__body {
+  padding: 6px;
+}
+.win95-section--inactive > .win95-section__title {
+  background: #808080;
+}
+
+/* Two- and three-column grids inside content. */
+.win95-grid {
+  display: grid;
+  gap: 6px;
+}
+.win95-grid--2 { grid-template-columns: 1fr 1fr; }
+.win95-grid--3 { grid-template-columns: 1fr 1fr 1fr; }
+.win95-grid--auto { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+/* ---- tables ----------------------------------------------------------- */
+.win95-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #bfbfbf;
+  font-size: 12px;
+  color: #000;
+}
+.win95-table thead th {
+  background: #c0c0c0;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  padding: 1px 6px;
+  text-align: left;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.win95-table tbody td {
+  padding: 1px 6px;
+  border-right: 1px solid #a0a0a0;
+  border-bottom: 1px solid #a0a0a0;
+  vertical-align: middle;
+}
+.win95-table tbody tr:hover td {
+  background: #000080;
+  color: #fff;
+}
+.win95-table tbody tr:hover td a {
+  color: #fff;
+}
+.win95-table--keyvalue {
+  width: 100%;
+}
+.win95-table--keyvalue th {
+  background: #bfbfbf;
+  text-align: right;
+  font-weight: bold;
+  padding: 2px 8px;
+  white-space: nowrap;
+  border: 0;
+  width: 1%;
+}
+.win95-table--keyvalue td {
+  padding: 2px 8px;
+  border: 0;
+}
+.win95-table--keyvalue tbody tr:hover td {
+  background: transparent;
+  color: inherit;
+}
+.win95-table--compact tbody td,
+.win95-table--compact thead th {
+  padding: 0 4px;
+}
+
+/* Row state colouring -- matches Bootstrap's table-warning/info/etc that
+   the existing templates already pass through round.class. */
+.win95-table tbody tr.win95-row--info    td { background: #cce5ff; }
+.win95-table tbody tr.win95-row--success td { background: #d4edda; }
+.win95-table tbody tr.win95-row--warning td { background: #fff3cd; }
+.win95-table tbody tr.win95-row--danger  td { background: #f8d7da; }
+.win95-table tbody tr.win95-row--muted   td { color: #404040; font-style: italic; }
+/* Bootstrap-class passthrough -- the row's existing class still triggers
+   the right tint without templates having to be updated. */
+.win95-table tbody tr.table-info    td,
+.win95-table tbody tr.table-primary td { background: #cce5ff; }
+.win95-table tbody tr.table-success td { background: #d4edda; }
+.win95-table tbody tr.table-warning td { background: #fff3cd; }
+.win95-table tbody tr.table-danger  td { background: #f8d7da; }
+.win95-table tbody tr.table-secondary td { background: #e2e3e5; }
+
+/* ---- buttons ---------------------------------------------------------- */
+.win95-button,
+.win95-content .btn,
+.win95-content button {
+  display: inline-block;
+  background: #bfbfbf;
+  color: #000;
+  padding: 2px 10px;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  text-decoration: none;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  min-width: 75px;
+  text-align: center;
+  outline: 1px solid transparent;
+}
+.win95-button:hover,
+.win95-content .btn:hover,
+.win95-content button:hover {
+  background: #bfbfbf;
+  color: #000;
+  text-decoration: none;
+}
+.win95-button:active,
+.win95-content .btn:active,
+.win95-content button:active,
+.win95-button.is-active,
+.win95-content .btn.active {
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  padding: 3px 9px 1px 11px;
+}
+.win95-button:focus,
+.win95-content .btn:focus,
+.win95-content button:focus {
+  outline: 1px dotted #000;
+  outline-offset: -3px;
+}
+.win95-button--sm {
+  padding: 1px 6px;
+  min-width: 0;
+  font-size: 11px;
+}
+.win95-button--block {
+  display: block;
+  width: 100%;
+}
+.win95-button[disabled],
+.win95-content .btn[disabled],
+.win95-content button[disabled] {
+  color: #808080;
+  text-shadow: 1px 1px 0 #fff;
+  cursor: not-allowed;
+}
+
+/* Map common Bootstrap button colour variants to the flat Win95 look but
+   keep a colour cue so the templates still communicate intent. */
+.win95-content .btn-primary   { background: #bfbfbf; color: #000080; font-weight: bold; }
+.win95-content .btn-secondary { background: #bfbfbf; color: #404040; }
+.win95-content .btn-success   { background: #bfbfbf; color: #006400; font-weight: bold; }
+.win95-content .btn-warning   { background: #bfbfbf; color: #804000; font-weight: bold; }
+.win95-content .btn-danger    { background: #bfbfbf; color: #800000; font-weight: bold; }
+.win95-content .btn-info      { background: #bfbfbf; color: #004080; }
+.win95-content .btn-sm        { padding: 1px 6px; min-width: 0; font-size: 11px; }
+
+/* ---- pagination ------------------------------------------------------- */
+.win95-pagination {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 4px 0;
+  list-style: none;
+  padding: 0;
+}
+.win95-pagination__item .win95-pagination__link {
+  display: inline-block;
+  min-width: 26px;
+  padding: 1px 6px;
+  text-align: center;
+  background: #bfbfbf;
+  color: #000;
+  text-decoration: none;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  font-size: 12px;
+}
+.win95-pagination__item--active .win95-pagination__link {
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  font-weight: bold;
+}
+.win95-pagination__sep {
+  padding: 0 4px;
+  color: #404040;
+}
+
+/* ---- breadcrumbs (rendered in title bar, kept here for fallback) ------ */
+.win95-breadcrumbs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+}
+.win95-breadcrumbs li::after {
+  content: " \\ ";
+  padding: 0 4px;
+  opacity: 0.7;
+}
+.win95-breadcrumbs li:last-child::after {
+  content: "";
+}
+.win95-breadcrumbs li,
+.win95-breadcrumbs li a {
+  color: inherit;
+  text-decoration: none;
+}
+.win95-breadcrumbs li a:hover {
+  text-decoration: underline;
+}
+
+/* ---- alerts (Bootstrap passthrough recoloured) ------------------------ */
+.win95-content .alert {
+  background: #bfbfbf;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  padding: 4px 8px;
+  margin: 0 0 6px;
+  color: #000;
+  font-size: 12px;
+}
+.win95-content .alert-warning { color: #804000; }
+.win95-content .alert-danger  { color: #800000; }
+.win95-content .alert-success { color: #006400; }
+.win95-content .alert-info    { color: #004080; }
+
+/* ---- forms (Bootstrap form-control passthrough) ----------------------- */
+.win95-content .form-control,
+.win95-content input[type="text"],
+.win95-content input[type="search"],
+.win95-content input[type="email"],
+.win95-content input[type="password"],
+.win95-content input[type="number"],
+.win95-content textarea,
+.win95-content select {
+  background: #fff;
+  color: #000;
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  outline: 1px solid #808080;
+  padding: 2px 4px;
+  font: inherit;
+}
+
+/* ---- Bootstrap layout-class passthrough ------------------------------- */
+/* keep the .row/.col grids working inside themed content, but flat */
+.win95-content .row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -3px;
+}
+.win95-content .col,
+.win95-content [class*="col-"] {
+  padding: 0 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- jumbotron (used on home page) ------------------------------------ */
+.win95-content .jumbotron {
+  background: #bfbfbf;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  padding: 8px 10px;
+  margin: 0;
+  text-align: center;
+}
+.win95-content .jumbotron h2,
+.win95-content .jumbotron .display-4 {
+  font-family: "Lucida Console", "Courier New", Courier, monospace;
+  font-size: 32px;
+  font-weight: bold;
+  margin: 4px 0;
+}
+.win95-content .jumbotron .text-muted {
+  color: #404040;
+}
+.win95-content .jumbotron small {
+  font-size: 11px;
+}
+
+/* ---- footer (legacy, kept compact) ------------------------------------ */
+.win95-footer {
+  width: 960px;
+  margin: 6px auto 0;
+  padding: 4px 6px;
+  background: #bfbfbf;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  font-size: 11px;
+  color: #000;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.win95-footer .text-muted {
+  color: #404040;
+}
+
+/* ---- utility ---------------------------------------------------------- */
+.win95-spacer { height: 6px; }
+.win95-flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.win95-muted { color: #404040; }
+.win95-mono  { font-family: "Lucida Console", "Courier New", Courier, monospace; }
+.win95-nowrap { white-space: nowrap; }
+.win95-right  { text-align: right; }
+.win95-center { text-align: center; }
+
+/* Hide the legacy floating Bootstrap nav -- the menubar replaces it. */
+.win95-window .navbar.fixed-top,
+body > .navbar.fixed-top {
+  display: none;
+}
+
+/* Hide Bootstrap default body padding-top that compensated for fixed nav. */
+body {
+  padding-top: 24px !important;
+}
