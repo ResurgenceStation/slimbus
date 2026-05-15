@@ -2,14 +2,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-{# ntOS95 retro PDA theme fonts:
-   - IBM Plex Sans / Mono (Google) for body and code (300/400/600/700)
-   - W95FA (jsDelivr, Win95 system-font replica) is loaded via @font-face
-     inside ntos95.css below.                                             #}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
-
 {% for k, v in ogdata %}
 <meta property="og:{{k}}" content="{{v}}" />
 {% endfor %}
@@ -17,7 +9,9 @@
 {% include 'base/css/style.css' %}
 </style>
 {# ntOS95 retro PDA theme -- loaded AFTER Bootstrap so its overrides win
-   on cascade order. Wraps every page in the Win95 window shell. #}
+   on cascade order. Wraps every page in the Win95 window shell.
+   No webfonts -- uses system MS Sans Serif / Microsoft Sans Serif /
+   Tahoma fallback chain. #}
 <style>
 {% include 'base/css/ntos95.css' %}
 </style>

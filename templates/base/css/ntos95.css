@@ -3,65 +3,49 @@
  *
  * Source: https://github.com/tgstation/tgui-core/blob/main/styles/themes/ntOS95.scss
  *
- * Palette is the in-game PDA "Retro" option with a beige warm tint on the
- * window chrome (operator preference). Title bar stays navy, content area
- * is cream instead of grey so inner blocks don't read as "windows inside
- * windows".
+ * Visual target: logs.owo.fm directory listing. Pure system MS Sans
+ * Serif (no webfont), tight 11px body, the classic ntOS95 grey window
+ * chrome on a desaturated cyan desktop, a white-ish interior content
+ * area, no nested-window look, no decorative accent bars, fully
+ * symmetric paddings.
  *
- *   Desktop teal       #008080
- *   Window beige-grey  #cac4af  (was #bfbfbf -- warm tinted)
- *   Frame highlight    #e8e0c9
- *   Frame shadow       #6a5f4a
- *   Frame midtone      #948c79
+ * Palette:
+ *   Desktop cyan       #5f9ea0  (cadet blue, less saturated than teal)
+ *   Frame grey         #bfbfbf  (ntOS95 source)
+ *   Frame highlight    #dfdfdf
+ *   Frame shadow       #404040
+ *   Frame midtone      #808080
  *   Title bar navy     #000080
  *   Title bar text     #ffffff
- *   Content cream      #f3efe2
- *   Status grey        #808080
- *   Body text          #1a1a1a
+ *   Content surface    #f4f4f4  (cool light grey, takes the cyan tone)
+ *   Body text          #000000
  *
- * Two web fonts paired for legibility + character:
- *   - W95FA (Win95 system-font replica) for chrome and headings
- *   - IBM Plex Sans (300/400/600/700) for body content
- * Both fall through to system fonts gracefully if the network call fails.
- *
- * Layout: every page wrapped in one 1140px-wide window. Chrome height is
- * constant across pages, content area grows vertically only.
+ * Layout: every page wrapped in one 1140px window. Chrome is constant
+ * across pages, content area grows vertically only. Spacing is a strict
+ * 4 / 8 / 12 / 16 / 24px scale -- nothing in between.
  * ===================================================================== */
-
-/* ---- W95FA web font (Win95 system-font replica) ---------------------- */
-/* Source: https://github.com/blue-bird1/W95FA (MIT-style free use)        */
-@font-face {
-  font-family: "W95FA";
-  font-style: normal;
-  font-weight: 400;
-  src: url("https://cdn.jsdelivr.net/gh/blue-bird1/W95FA@main/W95FA.otf") format("opentype");
-  font-display: swap;
-}
 
 /* ---- palette variables ----------------------------------------------- */
 :root {
-  --w95-desktop:        #008080;
-  --w95-frame:          #cac4af;
-  --w95-frame-hi:       #e8e0c9;
-  --w95-frame-lo:       #6a5f4a;
-  --w95-frame-md:       #948c79;
+  --w95-desktop:        #5f9ea0;
+  --w95-frame:          #bfbfbf;
+  --w95-frame-hi:       #dfdfdf;
+  --w95-frame-lo:       #404040;
+  --w95-frame-md:       #808080;
   --w95-titlebar:       #000080;
   --w95-titlebar-text:  #ffffff;
   --w95-titlebar-off:   #808080;
-  --w95-content-bg:     #f3efe2;
-  --w95-content-text:   #1a1a1a;
+  --w95-content-bg:    #f4f4f4;
+  --w95-content-alt:   #e8e8e8;
+  --w95-content-text:  #000000;
   --w95-link:           #000080;
   --w95-link-visited:   #4b006e;
-  --w95-link-hover-bg:  #ffff80;
-  --w95-muted:          #4a4a4a;
-  --w95-accent:         #000080;
-  --w95-accent-warm:    #804000;
+  --w95-muted:          #555555;
   --w95-accent-ok:      #006400;
   --w95-accent-warn:    #804000;
   --w95-accent-bad:     #8b0000;
-  --w95-font-chrome:    "W95FA", "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Geneva, sans-serif;
-  --w95-font-body:      "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
-  --w95-font-mono:      "IBM Plex Mono", "Lucida Console", "Courier New", Courier, monospace;
+  --w95-font:           "MS Sans Serif", "Microsoft Sans Serif", Tahoma, sans-serif;
+  --w95-font-mono:      "Lucida Console", "Courier New", Courier, monospace;
 }
 
 /* ---- root resets ------------------------------------------------------ */
@@ -70,8 +54,8 @@ html, body {
   padding: 0;
   background: var(--w95-desktop);
   color: var(--w95-content-text);
-  font-family: var(--w95-font-body);
-  font-size: 13px;
+  font-family: var(--w95-font);
+  font-size: 11px;
   line-height: 1.4;
 }
 body {
@@ -82,7 +66,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Kill rounded everything inside themed pages. */
+/* Kill rounded everything + box-shadow + transitions inside themed pages. */
 .win95-window *,
 .win95-window *::before,
 .win95-window *::after {
@@ -115,13 +99,13 @@ body {
   justify-content: space-between;
   font-weight: bold;
   user-select: none;
-  font-family: var(--w95-font-chrome);
-  font-size: 13px;
+  font-family: var(--w95-font);
+  font-size: 11px;
 }
 .win95-titlebar__brand {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -147,7 +131,7 @@ body {
   border-left: 1px solid var(--w95-frame-hi);
   border-right: 1px solid var(--w95-frame-lo);
   border-bottom: 1px solid var(--w95-frame-lo);
-  font-family: "Marlett", "W95FA", "MS Sans Serif", monospace;
+  font-family: "Marlett", var(--w95-font);
   font-size: 9px;
   line-height: 14px;
   text-align: center;
@@ -155,13 +139,13 @@ body {
   user-select: none;
 }
 
-/* Menu bar -- functional nav links, Win95 menu hover behaviour */
+/* Menu bar -- matches logs.owo.fm: minimal File/Edit/View/Help row */
 .win95-menubar {
   background: var(--w95-frame);
   padding: 2px 4px;
   border-bottom: 1px solid var(--w95-frame-md);
-  font-family: var(--w95-font-chrome);
-  font-size: 13px;
+  font-family: var(--w95-font);
+  font-size: 11px;
   color: #000;
   display: flex;
   align-items: center;
@@ -170,11 +154,12 @@ body {
 .win95-menubar__item { position: relative; }
 .win95-menubar__link {
   display: inline-block;
-  padding: 2px 10px;
+  padding: 2px 8px;
   color: #000;
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
+  font-size: 11px;
 }
 .win95-menubar__link i { margin-right: 4px; }
 .win95-menubar__link:hover,
@@ -183,10 +168,10 @@ body {
   background: var(--w95-titlebar);
   color: #fff;
   outline: none;
+  text-decoration: none;
 }
 .win95-menubar__link[aria-haspopup="true"]::after {
-  content: " \25BE";
-  font-size: 9px;
+  content: "";
 }
 .win95-menubar__submenu {
   display: none;
@@ -207,7 +192,7 @@ body {
 }
 .win95-menubar__item:hover > .win95-menubar__submenu,
 .win95-menubar__item:focus-within > .win95-menubar__submenu { display: block; }
-.win95-menubar__submenu .win95-menubar__link { display: block; padding: 3px 18px; }
+.win95-menubar__submenu .win95-menubar__link { display: block; padding: 3px 16px; }
 .win95-menubar__right {
   margin-left: auto;
   display: flex;
@@ -216,19 +201,22 @@ body {
   padding: 0 4px;
   white-space: nowrap;
 }
-.win95-menubar__right a { color: #000; text-decoration: underline; }
+.win95-menubar__right a {
+  color: #000;
+  text-decoration: none;
+}
+.win95-menubar__right a:hover { text-decoration: underline; }
 .win95-menubar__badge {
   background: #800000;
   color: #fff;
-  padding: 1px 5px;
+  padding: 1px 4px;
   font-size: 10px;
   font-weight: bold;
   text-decoration: none;
-  font-family: var(--w95-font-chrome);
+  font-family: var(--w95-font);
 }
 
-/* Content area -- inset bevel; CREAM fill so inner blocks don't echo the
-   outer window grey ("no windows inside windows") */
+/* Content area -- inset bevel; cool light-grey fill */
 .win95-content {
   background: var(--w95-content-bg);
   border-top: 1px solid var(--w95-frame-lo);
@@ -236,53 +224,57 @@ body {
   border-right: 1px solid var(--w95-frame-hi);
   border-bottom: 1px solid var(--w95-frame-hi);
   margin: 4px;
-  padding: 12px 14px;
+  padding: 16px;
   color: var(--w95-content-text);
-  font-family: var(--w95-font-body);
-  font-size: 13px;
+  font-family: var(--w95-font);
+  font-size: 11px;
 }
 .win95-content h1,
 .win95-content h2,
 .win95-content h3,
 .win95-content h4 {
-  font-family: var(--w95-font-chrome);
+  font-family: var(--w95-font);
   font-weight: bold;
-  margin: 10px 0 6px;
+  margin: 12px 0 8px;
   color: var(--w95-content-text);
 }
-.win95-content h1 { font-size: 20px; }
-.win95-content h2 { font-size: 16px; }
-.win95-content h3 { font-size: 14px; }
-.win95-content h4 { font-size: 13px; }
-.win95-content p { margin: 0 0 6px; }
+.win95-content h1 { font-size: 16px; }
+.win95-content h2 { font-size: 14px; }
+.win95-content h3 { font-size: 12px; }
+.win95-content h4 { font-size: 11px; }
+.win95-content p { margin: 0 0 8px; }
 .win95-content hr {
   border: 0;
   border-top: 1px solid var(--w95-frame-md);
   margin: 8px 0;
 }
-.win95-content a { color: var(--w95-link); }
+.win95-content a {
+  color: var(--w95-link);
+  text-decoration: underline;
+}
 .win95-content a:visited { color: var(--w95-link-visited); }
-.win95-content a:hover { background: var(--w95-link-hover-bg); }
+.win95-content a:hover { text-decoration: underline; }
+
 .win95-content code,
 .win95-content samp,
 .win95-content pre {
   font-family: var(--w95-font-mono);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 /* Status bar */
 .win95-statusbar {
   background: var(--w95-frame);
   border-top: 1px solid var(--w95-frame-hi);
-  padding: 3px 6px;
-  font-family: var(--w95-font-chrome);
-  font-size: 12px;
+  padding: 3px 4px;
+  font-family: var(--w95-font);
+  font-size: 11px;
   color: #000;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 2px;
-  gap: 8px;
+  gap: 4px;
 }
 .win95-statusbar__cell {
   padding: 1px 8px;
@@ -293,60 +285,50 @@ body {
   min-width: 60px;
 }
 
-/* ---- sections (NOT nested-window; flat blocks with a heading rule) ---- */
+/* ---- sections (flat, left-aligned, underlined heading) --------------- */
 .win95-section {
   background: transparent;
   border: 0;
   margin: 0 0 16px;
   padding: 0;
 }
+.win95-section:last-child { margin-bottom: 0; }
 .win95-section__title {
   background: transparent;
   color: var(--w95-content-text);
-  font-family: var(--w95-font-chrome);
-  font-size: 14px;
+  font-family: var(--w95-font);
+  font-size: 12px;
   font-weight: bold;
-  padding: 4px 0;
-  margin: 0 0 8px;
-  border-bottom: 2px solid var(--w95-frame-md);
+  padding: 0 0 4px 0;
+  margin: 0 0 8px 0;
+  border-bottom: 1px solid var(--w95-frame-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-.win95-section__title::before {
-  content: "";
-  display: inline-block;
-  width: 4px;
-  height: 14px;
-  background: var(--w95-titlebar);
-  margin-right: 8px;
-  vertical-align: middle;
-  flex-shrink: 0;
-}
 .win95-section__title small {
   font-weight: normal;
   font-size: 11px;
   color: var(--w95-muted);
-  font-family: var(--w95-font-body);
 }
+.win95-section__title small a { color: var(--w95-link); }
 .win95-section__body { padding: 0; }
-.win95-section--inactive .win95-section__title::before { background: var(--w95-frame-md); }
 .win95-section--inactive .win95-section__title { color: var(--w95-muted); }
 
-/* Grids */
-.win95-grid { display: grid; gap: 10px; }
+/* Grids -- consistent 12px gap */
+.win95-grid { display: grid; gap: 12px; }
 .win95-grid--2 { grid-template-columns: 1fr 1fr; }
 .win95-grid--3 { grid-template-columns: 1fr 1fr 1fr; }
 .win95-grid--auto { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 
-/* ---- tables ----------------------------------------------------------- */
+/* ---- tables ---------------------------------------------------------- */
 .win95-table {
   width: 100%;
   border-collapse: collapse;
   background: transparent;
-  font-family: var(--w95-font-body);
-  font-size: 13px;
+  font-family: var(--w95-font);
+  font-size: 11px;
   color: var(--w95-content-text);
 }
 .win95-table thead th {
@@ -355,35 +337,38 @@ body {
   border-left: 1px solid var(--w95-frame-hi);
   border-right: 1px solid var(--w95-frame-lo);
   border-bottom: 1px solid var(--w95-frame-lo);
-  padding: 2px 8px;
+  padding: 3px 8px;
   text-align: left;
-  font-family: var(--w95-font-chrome);
   font-weight: bold;
   white-space: nowrap;
 }
 .win95-table tbody td {
-  padding: 2px 8px;
-  border-right: 1px solid #d6d1bf;
-  border-bottom: 1px solid #d6d1bf;
+  padding: 3px 8px;
+  border-right: 1px solid var(--w95-content-alt);
+  border-bottom: 1px solid var(--w95-content-alt);
   vertical-align: middle;
 }
-.win95-table tbody tr:nth-child(even) td { background: #ece6d5; }
-.win95-table tbody tr:hover td { background: var(--w95-titlebar); color: #fff; }
+.win95-table tbody tr:nth-child(even) td { background: var(--w95-content-alt); }
+.win95-table tbody tr:hover td {
+  background: var(--w95-titlebar);
+  color: #fff;
+}
 .win95-table tbody tr:hover td a,
-.win95-table tbody tr:hover td i { color: #fff; }
+.win95-table tbody tr:hover td i {
+  color: #fff;
+}
 .win95-table--keyvalue th {
   background: transparent;
   text-align: right;
   font-weight: bold;
-  padding: 3px 10px;
+  padding: 4px 12px;
   white-space: nowrap;
   border: 0;
   border-bottom: 1px dotted var(--w95-frame-md);
   width: 1%;
-  font-family: var(--w95-font-chrome);
 }
 .win95-table--keyvalue td {
-  padding: 3px 10px;
+  padding: 4px 12px;
   border: 0;
   border-bottom: 1px dotted var(--w95-frame-md);
 }
@@ -394,9 +379,9 @@ body {
 }
 .win95-table--keyvalue tbody tr:hover td a { color: var(--w95-link); }
 .win95-table--compact tbody td,
-.win95-table--compact thead th { padding: 1px 6px; }
+.win95-table--compact thead th { padding: 2px 6px; }
 
-/* Bootstrap row-class passthrough for state colouring */
+/* Bootstrap row-class passthrough */
 .win95-table tbody tr.table-info    td,
 .win95-table tbody tr.table-primary td { background: #cce5ff; }
 .win95-table tbody tr.table-success td { background: #d4edda; }
@@ -404,62 +389,69 @@ body {
 .win95-table tbody tr.table-danger  td { background: #f8d7da; }
 .win95-table tbody tr.table-secondary td { background: #e2e3e5; }
 
-/* ---- KPI cards (home page) ------------------------------------------- */
+/* ---- KPI cards (home) ------------------------------------------------ */
 .win95-kpi {
-  background: #fffaec;
+  background: #ffffff;
   border-top: 1px solid var(--w95-frame-lo);
   border-left: 1px solid var(--w95-frame-lo);
   border-right: 1px solid var(--w95-frame-hi);
   border-bottom: 1px solid var(--w95-frame-hi);
-  padding: 12px 14px;
+  padding: 16px;
   text-align: center;
-  font-family: var(--w95-font-body);
+  font-family: var(--w95-font);
 }
 .win95-kpi__label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--w95-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-weight: 600;
+  font-weight: bold;
 }
 .win95-kpi__value {
-  font-family: var(--w95-font-chrome);
+  font-family: var(--w95-font);
   font-size: 28px;
   font-weight: bold;
   color: var(--w95-titlebar);
-  margin: 4px 0 2px;
-  line-height: 1.1;
+  margin: 8px 0 4px;
+  line-height: 1;
 }
 .win95-kpi__sub {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--w95-content-text);
 }
-.win95-kpi__sub a { font-weight: 600; }
+.win95-kpi__sub a { font-weight: bold; }
 
-/* ---- buttons (Win95 chunky) ------------------------------------------ */
+/* ---- buttons (Win95 chunky, never underlined) ----------------------- */
 .win95-button,
 .win95-content .btn,
 .win95-content button {
   display: inline-block;
   background: var(--w95-frame);
-  color: #000;
-  padding: 3px 12px;
+  color: #000 !important;
+  padding: 4px 16px;
   border-top: 1px solid var(--w95-frame-hi);
   border-left: 1px solid var(--w95-frame-hi);
   border-right: 1px solid var(--w95-frame-lo);
   border-bottom: 1px solid var(--w95-frame-lo);
-  text-decoration: none;
-  font-family: var(--w95-font-chrome);
-  font-size: 12px;
+  text-decoration: none !important;
+  font-family: var(--w95-font);
+  font-size: 11px;
+  font-weight: normal;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
   min-width: 78px;
   text-align: center;
+  vertical-align: middle;
+  margin: 2px 4px 2px 0;
 }
 .win95-button:hover,
 .win95-content .btn:hover,
-.win95-content button:hover { background: var(--w95-frame); text-decoration: none; }
+.win95-content button:hover {
+  background: var(--w95-frame);
+  color: #000 !important;
+  text-decoration: none !important;
+}
 .win95-button:active,
 .win95-content .btn:active,
 .win95-content button:active,
@@ -469,49 +461,61 @@ body {
   border-left: 1px solid var(--w95-frame-lo);
   border-right: 1px solid var(--w95-frame-hi);
   border-bottom: 1px solid var(--w95-frame-hi);
-  padding: 4px 11px 2px 13px;
+  padding: 5px 15px 3px 17px;
 }
 .win95-button:focus,
 .win95-content .btn:focus,
-.win95-content button:focus { outline: 1px dotted #000; outline-offset: -4px; }
+.win95-content button:focus {
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+}
 .win95-button--sm {
-  padding: 1px 8px;
+  padding: 2px 10px;
   min-width: 0;
   font-size: 11px;
 }
+.win95-button--sm:active,
+.win95-button--sm.is-active {
+  padding: 3px 9px 1px 11px;
+}
 .win95-button i { margin-right: 4px; }
 
-.win95-content .btn-primary   { color: var(--w95-titlebar); font-weight: bold; }
-.win95-content .btn-secondary { color: var(--w95-muted); }
-.win95-content .btn-success   { color: var(--w95-accent-ok); font-weight: bold; }
-.win95-content .btn-warning   { color: var(--w95-accent-warn); font-weight: bold; }
-.win95-content .btn-danger    { color: var(--w95-accent-bad); font-weight: bold; }
-.win95-content .btn-info      { color: #004080; }
-.win95-content .btn-sm        { padding: 1px 6px; min-width: 0; font-size: 11px; }
+.win95-content .btn-primary   { font-weight: bold; }
+.win95-content .btn-success   { font-weight: bold; }
+.win95-content .btn-warning   { font-weight: bold; }
+.win95-content .btn-danger    { font-weight: bold; }
+.win95-content .btn-sm        { padding: 2px 10px; min-width: 0; font-size: 11px; }
 
-/* ---- pagination ------------------------------------------------------- */
+/* Override Bootstrap link colour bleed inside buttons */
+.win95-content a.btn,
+.win95-content a.win95-button {
+  color: #000 !important;
+  text-decoration: none !important;
+}
+
+/* ---- pagination ------------------------------------------------------ */
 .win95-pagination {
   display: flex;
   align-items: center;
   gap: 2px;
-  margin: 6px 0;
+  margin: 8px 0;
   list-style: none;
   padding: 0;
-  font-family: var(--w95-font-chrome);
+  font-family: var(--w95-font);
 }
 .win95-pagination__item .win95-pagination__link {
   display: inline-block;
   min-width: 28px;
-  padding: 1px 8px;
+  padding: 2px 8px;
   text-align: center;
   background: var(--w95-frame);
-  color: #000;
-  text-decoration: none;
+  color: #000 !important;
+  text-decoration: none !important;
   border-top: 1px solid var(--w95-frame-hi);
   border-left: 1px solid var(--w95-frame-hi);
   border-right: 1px solid var(--w95-frame-lo);
   border-bottom: 1px solid var(--w95-frame-lo);
-  font-size: 12px;
+  font-size: 11px;
 }
 .win95-pagination__item--active .win95-pagination__link {
   border-top: 1px solid var(--w95-frame-lo);
@@ -522,24 +526,24 @@ body {
 }
 .win95-pagination__sep { padding: 0 4px; color: var(--w95-muted); }
 
-/* ---- alerts ---------------------------------------------------------- */
+/* ---- alerts --------------------------------------------------------- */
 .win95-content .alert {
-  background: #fffaec;
+  background: #ffffff;
   border-top: 1px solid var(--w95-frame-lo);
   border-left: 1px solid var(--w95-frame-lo);
   border-right: 1px solid var(--w95-frame-hi);
   border-bottom: 1px solid var(--w95-frame-hi);
-  padding: 6px 10px;
-  margin: 0 0 8px;
+  padding: 8px 12px;
+  margin: 0 0 12px;
   color: var(--w95-content-text);
-  font-size: 12px;
+  font-size: 11px;
 }
 .win95-content .alert-warning { color: var(--w95-accent-warn); }
 .win95-content .alert-danger  { color: var(--w95-accent-bad); }
 .win95-content .alert-success { color: var(--w95-accent-ok); }
 .win95-content .alert-info    { color: #004080; }
 
-/* ---- forms ------------------------------------------------------------ */
+/* ---- forms --------------------------------------------------------- */
 .win95-content .form-control,
 .win95-content input[type="text"],
 .win95-content input[type="search"],
@@ -557,16 +561,15 @@ body {
   outline: 1px solid var(--w95-frame-md);
   padding: 2px 6px;
   font: inherit;
-  font-family: var(--w95-font-body);
+  font-family: var(--w95-font);
 }
 
 /* ---- Bootstrap row/col passthrough inside themed content -------------- */
-.win95-content .row { display: flex; flex-wrap: wrap; margin: 0 -5px; }
+.win95-content .row { display: flex; flex-wrap: wrap; margin: 0 -4px; }
 .win95-content .col,
-.win95-content [class*="col-"] { padding: 0 5px; flex: 1; min-width: 0; }
+.win95-content [class*="col-"] { padding: 0 4px; flex: 1; min-width: 0; }
 
-/* ---- chart containers (Chart.js / ApexCharts / Plotly) --------------- */
-/* Keep every chart inside the window: limit to the content area's box. */
+/* ---- chart containers ----------------------------------------------- */
 .win95-content canvas,
 .win95-content svg,
 .win95-content .apexcharts-canvas,
@@ -584,23 +587,22 @@ body {
   width: 100% !important;
   overflow: hidden;
 }
-/* Keep ApexCharts toolbar/tooltips inside the window */
 .win95-content .apexcharts-toolbar,
 .win95-content .apexcharts-menu,
 .win95-content .apexcharts-tooltip { max-width: 100%; }
 
-/* ---- footer ---------------------------------------------------------- */
+/* ---- footer --------------------------------------------------------- */
 .win95-footer {
   width: 1140px;
   max-width: calc(100vw - 32px);
   margin: 6px auto 0;
-  padding: 5px 8px;
+  padding: 4px 8px;
   background: var(--w95-frame);
   border-top: 1px solid var(--w95-frame-hi);
   border-left: 1px solid var(--w95-frame-hi);
   border-right: 1px solid var(--w95-frame-lo);
   border-bottom: 1px solid var(--w95-frame-lo);
-  font-family: var(--w95-font-chrome);
+  font-family: var(--w95-font);
   font-size: 11px;
   color: #000;
   display: flex;
@@ -609,7 +611,7 @@ body {
 }
 .win95-footer .text-muted { color: var(--w95-muted); }
 
-/* ---- utility --------------------------------------------------------- */
+/* ---- utility ------------------------------------------------------- */
 .win95-flex-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .win95-flex-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .win95-muted { color: var(--w95-muted); }
@@ -623,16 +625,14 @@ body {
 /* Hide the legacy floating Bootstrap nav -- the menubar replaces it. */
 .win95-window .navbar.fixed-top,
 body > .navbar.fixed-top { display: none; }
-
-/* Reset body padding-top that compensated for the fixed Bootstrap nav. */
 body { padding-top: 24px !important; }
 
-/* ---- icon sizing (FontAwesome) --------------------------------------- */
+/* ---- icon sizing ---------------------------------------------------- */
 .win95-content .fa,
 .win95-content .fas,
 .win95-content .far,
 .win95-content .fab {
-  font-size: 12px;
+  font-size: 11px;
   vertical-align: -1px;
 }
 .win95-titlebar .fa,
