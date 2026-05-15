@@ -1,28 +1,38 @@
 {% extends "base/index.html"%}
 {% block pagetitle %}Round #{{round.id}}{% endblock %}
-{% block titlebar %}STAT / {{stat.key_name|upper}} / ROUND #{{round.id}}{% endblock %}
 {% block content %}
-<h2><code>{{stat.key_name}}</code>
-  <small>
-    <a class="pda-link" href="{{path_for('round.single',{'id':round.id})}}">
+<h2><code>{{stat.key_name}}</code><small>
+    <a href="{{path_for('round.single',{'id':round.id})}}">
       <i class="fas fa-circle"></i> {{round.id}}
     </a>
   </small>
 </h2>
+<hr>
+  {% if stat.label.splain %}
+  <div class="alert alert-secondary" role="alert">
+    {{stat.label.splain}}
+  </div>
+  {% endif %}
+  {% include ['stats/single/' ~ stat.key_name ~'-' ~ stat.version ~'.tpl', 'stats/single/' ~ stat.key_name ~'.tpl','stats/type/' ~ stat.key_type ~'.tpl', 'stats/generic.tpl'] %}
+  <hr>
+  <dl class="row">
+    <dt class="col-sm-3">Stat ID</dt>
+    <dd class="col-sm-9">{{stat.id}}</dd>
 
-{% if stat.label.splain %}
-<div class="pda-alert pda-alert--info" role="alert">{{stat.label.splain}}</div>
-{% endif %}
+    <dt class="col-sm-3">Stat Type</dt>
+    <dd class="col-sm-9"><code>{{stat.key_type}}</code></dd>
 
-{% include ['stats/single/' ~ stat.key_name ~'-' ~ stat.version ~'.tpl', 'stats/single/' ~ stat.key_name ~'.tpl','stats/type/' ~ stat.key_type ~'.tpl', 'stats/generic.tpl'] %}
+    <dt class="col-sm-3">Stat Name</dt>
+    <dd class="col-sm-9"><code>{{stat.key_name}}</code></dd>
 
-<h3>Stat Metadata</h3>
-<table class="pda-table pda-table--keyvalue">
-  <tbody>
-    <tr><th>Stat ID</th><td>{{stat.id}}</td><th>Stat Type</th><td><code>{{stat.key_type}}</code></td></tr>
-    <tr><th>Stat Name</th><td><code>{{stat.key_name}}</code></td><th>Timestamp Recorded</th><td>{{stat.datetime}}</td></tr>
-    <tr><th>Stat Version</th><td>{{stat.version}}</td><th>Raw JSON</th><td><pre>{{stat.json}}</pre></td></tr>
-  </tbody>
-</table>
+    <dt class="col-sm-3">Timestamp Recorded</dt>
+    <dd class="col-sm-9">{{stat.datetime}}</dd>
+
+    <dt class="col-sm-3">Stat Version</dt>
+    <dd class="col-sm-9">{{stat.version}}</dd>
+
+    <dt class="col-sm-3">Raw JSON</dt>
+    <dd class="col-sm-9"><pre>{{stat.json}}</pre></dd>
+  </dl>
 
 {% endblock %}

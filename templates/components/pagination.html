@@ -1,16 +1,9 @@
 {#
-    PDA-themed pagination component (Stage 2 migration).
-
-    Parameters (unchanged from the Bootstrap version):
-      * nbPages (int):     number of pages
+    Win95 pagination cluster.
+    Parameters:
+      * nbPages (int): number of pages
       * currentPage (int): current page
-      * url (string):      route base
-      * query (string):    optional query suffix
-
-    Output uses native .pda-pagination markup. Renders compact "<<" / "<" /
-    "1 2 3 4" / ">" / ">>" controls with the current page highlighted
-    via .pda-pagination__item--current. The "nearby pages" window
-    (4 either side of the current) is preserved from the original.
+      * url (string): route + query string base
 #}
 {% set param = '' %}
 {% if not query %}
@@ -18,32 +11,37 @@
 {% endif %}
 {% spaceless %}
 {% if nbPages > 1 %}
-
-    {# Number of pages around current page +/- #}
     {% set nearbyPagesLimit = 4 %}
-
-    <nav class="pda-pagination" aria-label="page navigation">
+    <ul class="win95-pagination">
         {% if currentPage != 1 %}
-            <a class="pda-pagination__item" href="{{url}}{{query}}" aria-label="First page">&laquo; FIRST</a>
-            <a class="pda-pagination__item" href="{{url}}{{param}}/page/{{currentPage - 1}}{{query}}" aria-label="Previous page">&lsaquo;</a>
+        <li class="win95-pagination__item">
+            <a class="win95-pagination__link" href="{{url}}{{query}}" title="First page">&laquo;&laquo;</a>
+        </li>
+        <li class="win95-pagination__item">
+            <a class="win95-pagination__link" href="{{url}}{{param}}/page/{{currentPage - 1}}{{query}}" title="Previous page">&laquo;</a>
+        </li>
         {% endif %}
-
         {% for i in 1..nbPages %}
-            {% if 0 == (currentPage - nearbyPagesLimit) - loop.index %} {# dot before #}
-            {% elseif 0 == (currentPage + nearbyPagesLimit) - loop.index %} {# dot after #}
-            {% elseif 0 < (currentPage - nearbyPagesLimit) - loop.index %} {# hide all before #}
-            {% elseif 0 > (currentPage + nearbyPagesLimit) - loop.index %} {# hide all after #}
+            {% if 0 == (currentPage - nearbyPagesLimit) - loop.index %}
+                <li class="win95-pagination__sep">&hellip;</li>
+            {% elseif 0 == (currentPage + nearbyPagesLimit) - loop.index %}
+                <li class="win95-pagination__sep">&hellip;</li>
+            {% elseif 0 < (currentPage - nearbyPagesLimit) - loop.index %}
+            {% elseif 0 > (currentPage + nearbyPagesLimit) - loop.index %}
             {% else %}
-                <a class="pda-pagination__item{% if currentPage == loop.index %} pda-pagination__item--current{% endif %}"
-                   href="{{url}}{{param}}/page/{{loop.index}}{{query}}"
-                   {% if currentPage == loop.index %}aria-current="page"{% endif %}>{{ loop.index }}</a>
+                <li class="win95-pagination__item{% if currentPage == loop.index %} win95-pagination__item--active{% endif %}">
+                    <a class="win95-pagination__link" href="{{url}}{{param}}/page/{{loop.index}}{{query}}">{{ loop.index }}</a>
+                </li>
             {% endif %}
         {% endfor %}
-
         {% if currentPage != nbPages %}
-            <a class="pda-pagination__item" href="{{url}}{{param}}/page/{{currentPage + 1}}{{query}}" aria-label="Next page">&rsaquo;</a>
-            <a class="pda-pagination__item" href="{{url}}{{param}}/page/{{nbPages}}{{query}}" aria-label="Last page">LAST &raquo;</a>
+        <li class="win95-pagination__item">
+            <a class="win95-pagination__link" href="{{url}}{{param}}/page/{{currentPage + 1}}{{query}}" title="Next page">&raquo;</a>
+        </li>
+        <li class="win95-pagination__item">
+            <a class="win95-pagination__link" href="{{url}}{{param}}/page/{{nbPages}}{{query}}" title="Last page">&raquo;&raquo;</a>
+        </li>
         {% endif %}
-    </nav>
+    </ul>
 {% endif %}
 {% endspaceless %}

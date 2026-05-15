@@ -1,24 +1,21 @@
 {% extends "base/index.html"%}
 {% block pagetitle %}Death Listing{% endblock %}
-{% block titlebar %}DEATHS{% endblock %}
 {% block content %}
-<div class="pda-listing-toolbar">
-  {% set vars = {
-    'nbPages': death.pages,
-    'currentPage': death.page,
-    'url': death.url
-    }
-  %}
+<div class="row">
+  <div class="col">
+    {% set vars = {
+      'nbPages': death.pages,
+      'currentPage': death.page,
+      'url': death.url
+      } 
+    %}
   {% include 'components/pagination.html' with vars %}
-
-  <div class="pda-listing-toolbar__meta">
-    <a class="pda-button pda-button--accent" href="{{path_for('death.lastwords')}}">
-      <i class="fas fa-quote-left"></i> Some famous last words
-    </a>
+  </div>
+  <div class="col text-right">
+    <a class="btn btn-primary" href="{{path_for('death.lastwords')}}">Some famous last words</a>
   </div>
 </div>
-
-<table class="pda-table">
+<table class="table table-sm table-bordered">
   {% include 'death/html/table-header.html' %}
   <tbody>
   {% for death in deaths %}
@@ -26,6 +23,5 @@
   {% endfor %}
   </tbody>
 </table>
-
-{% include 'components/pagination.html' with vars %}
+  {% include 'components/pagination.html' with vars %}
 {% endblock %}

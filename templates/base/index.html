@@ -1,103 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>{{statbus.app_name}} {% block pagetitle %}{% endblock %}</title>
+  <title>{{statbus.app_name}}{% block pagetitle %}{% endblock %}</title>
   {% include 'base/common/header.html' %}
 </head>
-{# PDA theme baseline: body class triggers pda.css. Add pda-crt for
-   CRT scanlines, pda-amber / pda-cyan for palette swaps. Operators can
-   override these defaults in their own templates/base/common/header.html
-   overlay if they want a different visual mode. #}
-<body class="pda-theme">
+<body>
+  {# ntOS95 Win95 window shell -- wraps EVERY page so chrome never shifts. #}
+  <div class="win95-window">
 
-{# Outer frame -- PDA bezel. Templates that don't want the frame (full-
-   screen viewers, map embeds, etc.) can override {% block frame %} to
-   skip it. The frame is decorative only; it doesn't constrain content. #}
-{% block frame %}
-<div class="pda-frame">
-  <span class="pda-frame__corner-bl"></span>
-  <span class="pda-frame__corner-br"></span>
-
-  {# Status bar: site identity, current section, viewer info, clock. #}
-  <div class="pda-frame__statusbar">
-    <span class="pda-frame__statusbar-section pda-frame__statusbar-section--ok">
-      {{statbus.app_name|default('STATBUS')}}
-    </span>
-    <span class="pda-frame__statusbar-section">
-      {% if user and user.ckey %}
-        USER: {{user.ckey|upper}}
-      {% else %}
-        USER: GUEST
-      {% endif %}
-    </span>
-    <span class="pda-frame__statusbar-section">
-      {% if classified is defined and classified %}
-        <span class="pda-tag pda-tag--warn">CLASSIFIED</span>
-      {% endif %}
-    </span>
-    <span class="pda-frame__statusbar-section" id="pda-clock">
-      {{app.currentDate|default('---')}}
-    </span>
-  </div>
-
-  {# Title bar: route/section name. Templates can override the title via
-     {% block titlebar %}. Default renders the deepest breadcrumb entry. #}
-  <div class="pda-frame__titlebar">
-    {% block titlebar %}
-      {% if breadcrumbs is defined and breadcrumbs|length > 0 %}
-        {%- for label, url in breadcrumbs -%}
-          {{- label|upper -}}{% if not loop.last %} / {% endif %}
-        {%- endfor -%}
-      {% else %}
-        TERMINAL
-      {% endif %}
-    {% endblock %}
-    <span class="pda-cursor"></span>
-  </div>
-
-  <div class="pda-frame__body">
-    {% block nav %} {{ include('base/nav.tpl') }} {% endblock %}
-
-    <main role="main">
-      <div class="container{% if wide is defined and wide %}-fluid{% endif %} position-relative" id="container">
-        {{alert|raw}}
-
+    {# ---- title bar ---------------------------------------------------- #}
+    <div class="win95-titlebar">
+      <div class="win95-titlebar__brand">
+        {# 16x16 SVG placeholder icon -- inlined to avoid an asset request #}
+        <svg class="win95-titlebar__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <rect width="16" height="16" fill="#000080"/>
+          <rect x="1" y="1" width="14" height="14" fill="#c0c0c0"/>
+          <rect x="2" y="2" width="12" height="2" fill="#000080"/>
+          <rect x="2" y="5" width="3" height="1" fill="#000"/>
+          <rect x="6" y="5" width="2" height="1" fill="#000"/>
+          <rect x="9" y="5" width="5" height="1" fill="#000"/>
+          <rect x="2" y="7" width="6" height="1" fill="#000"/>
+          <rect x="9" y="7" width="5" height="1" fill="#000"/>
+          <rect x="2" y="9" width="4" height="1" fill="#000"/>
+          <rect x="7" y="9" width="7" height="1" fill="#000"/>
+          <rect x="2" y="11" width="9" height="1" fill="#000"/>
+          <rect x="2" y="13" width="6" height="1" fill="#000"/>
+        </svg>
+        <a href="{{path_for('statbus')}}">ReduxStation Statbus</a>
         {% if breadcrumbs is defined and breadcrumbs|length > 1 %}
-          {% set nav = breadcrumbs %}
-          {% include('components/breadcrumbs.html') with nav %}
+          {% for label, url in breadcrumbs %}
+            {% if not loop.first %}
+              <span class="win95-titlebar__sep">\</span>
+              {% if loop.last %}<span>{{ label|raw }}</span>
+              {% else %}<a href="{{url}}">{{ label|raw }}</a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
         {% endif %}
-
-        {% if classified is defined and classified %}
-        <div class="alert alert-warning">
-          Information in TGDB should be considered <strong>TLP:://AMBER</strong>, unless otherwise noted.
-        </div>
-        {% endif %}
-
-        {% block content %} {% endblock %}
       </div>
-    </main>
-  </div>
+      <div class="win95-titlebar__controls" aria-hidden="true">
+        <div class="win95-titlebar__btn">_</div>
+        <div class="win95-titlebar__btn">&#9633;</div>
+        <div class="win95-titlebar__btn">&#10005;</div>
+      </div>
+    </div>
 
-  {# Function-bar style footer. Matches PDA "F1-F12 hint row" pattern. #}
-  <div class="pda-frame__footer">
-    <span>
-      <span class="pda-tag">TIMES: UTC</span>
-      <span class="pda-tag pda-tag--warn">PREVIEW DATA</span>
-    </span>
-    <span>
-      {% if settings.bug_reports %}
-        <a class="pda-link" href="{{settings.bug_reports}}" target="_blank" rel="noopener noreferrer">REPORT BUG</a>
+    {# ---- menu bar (functional nav) ----------------------------------- #}
+    {% block nav %}{{ include('base/nav.tpl') }}{% endblock %}
+
+    {# ---- content ----------------------------------------------------- #}
+    <div class="win95-content" id="container">
+      {{alert|raw}}
+      {% if classified is defined and classified %}
+        <div class="alert alert-warning">
+          Information in TGDB should be considered <strong>TLP://AMBER</strong>, unless otherwise noted.
+        </div>
       {% endif %}
-    </span>
-    <span>
-      <samp id="clock">{{app.currentDate}}</samp>
-    </span>
-  </div>
-</div>
-{% endblock %}
+      {% block content %}{% endblock %}
+    </div>
 
-{% include 'base/common/footer.html' %}
-{% block js %}
-{% endblock %}
+    {# ---- status bar -------------------------------------------------- #}
+    <div class="win95-statusbar">
+      <div class="win95-statusbar__cell">{% block status_left %}Ready{% endblock %}</div>
+      <div class="win95-statusbar__cell">All times UTC</div>
+      <div class="win95-statusbar__cell"><samp id="clock">{{app.currentDate}}</samp></div>
+    </div>
+
+  </div>
+
+  {# ---- footer (kept minimal, sits under the window) ------------------ #}
+  <div class="win95-footer">
+    <div>Data presented here should be treated as preliminary and non-operational.</div>
+    <div>
+      {% if settings.bug_reports %}
+        Bug? Feature? <a href="{{settings.bug_reports}}" target="_blank" rel="noopener noreferrer">Report</a>.
+      {% endif %}
+    </div>
+  </div>
+
+  {% include 'base/common/footer.html' %}
+  {% block js %}{% endblock %}
 </body>
 </html>

@@ -1,6 +1,7 @@
 <h3>Crew Manifest</h3>
+<hr>
 <p class="text-muted">In no particular order</p>
-<table class="pda-table sort">
+<table class="table table-bordered table-condensed table-hover sort">
   <thead>
     <tr>
       <th>ckey</th>
@@ -12,22 +13,22 @@
   </thead>
   <tbody>
     {% for c in crew %}
-      <tr class="{% if c.role %}pda-row--crashed{% endif %}">
+      <tr class="{% if c.role %}table-danger{% endif %}">
         <td>
         {% if user.canAccessTGDB %}
-          <a class="pda-link" href="tgdb/player.php?ckey={{c.ckey}}">{{c.ckey}}</a>
+          <a href="tgdb/player.php?ckey={{c.ckey}}">{{c.ckey}}</a>
         {% else %}
           {{c.ckey}}
         {% endif %}
-        </td>
+       </td>
         <td>{{c.name}}</td>
         <td>{{c.job}}</td>
         <td>{{c.role}}</td>
         <td>
           {% if c.roundstart %}
-            <span class="pda-tag pda-tag--ok">Roundstart</span>
+            <span class="badge badge-success">Roundstart</span>
           {% else %}
-            <span class="pda-tag pda-tag--warn">Latejoin</span>
+            <span class="badge badge-warning">Latejoin</span>
           {% endif %}
         </td>
       </tr>

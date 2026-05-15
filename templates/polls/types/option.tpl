@@ -1,18 +1,23 @@
-{# Poll option/multichoice result table (PDA-themed). #}
-<table class="pda-table sort">
+<table class="table table-sm table-bordered sort">
 <thead>
-  <tr>
-    <th>Votes</th>
-    <th>Percentage</th>
-    <th>Option</th>
-  </tr>
+  <tr>    
+    <th>Votes</th>   
+    <th>Percentage</th>   
+    <th>Option</th>   
+  </tr>   
 </thead>
 <tbody>
 {% for r in poll.results %}
 <tr>
-  <th>{{r.votes}}</th>
-  <td>{{r.percent}}</td>
-  <td>{{r.option|nl2br}}</td>
+  <th>
+    {{r.votes}}
+  </th>
+  <td>
+    {{r.percent}}
+  </td>
+  <td>
+    {{r.option|nl2br}}
+  </td>
 </tr>
 {% endfor %}
 </tbody>

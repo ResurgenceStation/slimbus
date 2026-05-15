@@ -1,16 +1,16 @@
-{% extends "base/index.html"%}
-{% block pagetitle %}Round #{{round.id}}{% endblock %}
-{% block titlebar %}ROUND #{{round.id}}{% endblock %}
+{% extends 'base/index.html' %}
+{% block pagetitle %} - Round #{{round.id}}{% endblock %}
+{% block status_left %}Round #{{round.id}} &middot; {{round.duration}}{% endblock %}
 {% block content %}
 
 {% if round.data.nuclear_challenge_mode %}
-<div class="pda-alert pda-alert--err">
+<div class="alert alert-danger" style="margin-bottom:6px;">
   <strong>ALERT!</strong> WAR WERE DECLARED!
 </div>
 {% endif %}
 
 {% if round.userWasAntag %}
-<div class="pda-alert pda-alert--ok">
+<div class="alert alert-success" style="margin-bottom:6px;">
   <strong>Hey, neat!</strong> Looks like you were an antagonist this round!
 </div>
 {% endif %}
@@ -19,25 +19,26 @@
 
 {% if round.data %}
   {% for name, stat in round.data %}
-  <div class="pda-card" id="prs">
-    <div class="pda-card__title">
-      <code>{{name}}</code>
+  <div class="win95-section" id="prs-{{name}}">
+    <div class="win95-section__title">
+      <code style="color:#fff;">{{name}}</code>
     </div>
-    <div class="pda-card__body">
+    <div class="win95-section__body">
       {% include ['stats/single/' ~ stat.key_name ~'-' ~ stat.version ~'.tpl', 'stats/single/' ~ stat.key_name ~'.tpl','stats/type/' ~ stat.key_type ~'.tpl', 'stats/generic.tpl'] %}
     </div>
   </div>
   {% endfor %}
 {% endif %}
 
-<h3>Round Stats</h3>
-<ul class="pda-stat-list">
-  {% for key, stat in round.stats %}
-  <li>
-    <a class="pda-link" href="{{path_for('round.single',{'id': round.id, 'stat':key})}}">
-      <code>{{key}}</code>
-    </a>
-  </li>
-  {% endfor %}
-</ul>
+<div class="win95-section">
+  <div class="win95-section__title">
+    <span>Round Stats</span>
+  </div>
+  <div class="win95-section__body">
+    {% for key, stat in round.stats %}
+      <a class="win95-button win95-button--sm win95-mono" href="{{path_for('round.single',{'id': round.id, 'stat':key})}}">{{key}}</a>
+    {% endfor %}
+  </div>
+</div>
+
 {% endblock %}

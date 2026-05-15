@@ -1,6 +1,7 @@
 <h3>PDA Logs</h3>
+<hr>
 <p class="text-muted">In no particular order</p>
-<table class="pda-table sort">
+<table class="table table-bordered table-condensed table-hover">
   <thead>
     <tr>
       <th>Timestamp</th>
@@ -14,7 +15,7 @@
     {% for d in round.logs %}
       <tr id="{{d.id}}">
         <td>
-          <a class="pda-link" href="#{{d.id}}">{{d.date}}</a><br>
+          <a href="#{{d.id}}">{{d.date}}</a><br>
           <small>{{d.coords.x}},{{d.coords.y}},{{d.coords.z}}</small>
         </td>
         <td>{{d.sender.name}}<br>
