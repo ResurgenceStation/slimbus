@@ -1,27 +1,34 @@
-<div class="row">
-  <div class="col-md-2 col-sm-12 h3">
-    <i class="fas fa-circle"></i> {{round.id}}<br>
-    <small>{{round.map}}</small>
+<div class="win95-section">
+  <div class="win95-section__title">
+    <span>Round #{{round.id}} &middot; {{round.map}}</span>
+    <small>{{round.server}}</small>
   </div>
-  <div class="col-md-8 col-sm-12 h3 text-center">
-    <i class="fas fa-{{round.icons.mode}}"></i> {{round.mode}} <br>
-    <div class="badge badge-{{round.class}} d-block">
-      <i class="fas fa-{{round.icons.result}}"></i> {{round.result}}
+  <div class="win95-section__body">
+    <div class="win95-grid win95-grid--3">
+      <div>
+        <div class="win95-muted"><small>Mode</small></div>
+        <div><strong>{{round.mode}}</strong></div>
+      </div>
+      <div class="win95-center">
+        <div class="win95-muted"><small>Result</small></div>
+        <div><strong>{{round.result}}</strong></div>
+      </div>
+      <div class="win95-right">
+        <div class="win95-muted"><small>Duration</small></div>
+        <div><strong>{{round.duration}}</strong></div>
+      </div>
     </div>
-    {# Three-tier end-time display, matching upstream Statbus. #}
-    <small>
-      Started {{round.start_datetime}},
+    <hr>
+    <div class="win95-mono" style="font-size:11px;">
+      <strong>Started</strong> {{round.start_datetime}}
+      {# Three-tier end-time display, matching upstream Statbus. #}
       {% if round.end_datetime and round.shutdown_datetime %}
-        Ended {{round.end_datetime}} (Shutdown: {{round.shutdown_datetime}})
+        &middot; <strong>Ended</strong> {{round.end_datetime}} <span class="win95-muted">(Shutdown {{round.shutdown_datetime}})</span>
       {% elseif round.shutdown_datetime %}
-        Shutdown {{round.shutdown_datetime}}
+        &middot; <strong>Shutdown</strong> {{round.shutdown_datetime}}
       {% else %}
-        Server crashed - No end timings
+        &middot; <span class="win95-muted">Server crashed &mdash; no end timings</span>
       {% endif %}
-    </small>
-  </div>
-  <div class="col-md-2 col-sm-12 h3 text-right">
-    {{round.server}}<br>
-    {{round.duration}}
+    </div>
   </div>
 </div>

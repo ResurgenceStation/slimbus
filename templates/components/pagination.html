@@ -1,9 +1,9 @@
 {#
+    Win95 pagination cluster.
     Parameters:
       * nbPages (int): number of pages
-      * currentPage (int): current pages
-      * url (string): route name & query (string): route parameter
-        ex: list/page-5?q=myFilter (5 = page and query = myFilter)
+      * currentPage (int): current page
+      * url (string): route + query string base
 #}
 {% set param = '' %}
 {% if not query %}
@@ -11,34 +11,37 @@
 {% endif %}
 {% spaceless %}
 {% if nbPages > 1 %}
-
-    {# Number of page around current page+1 #}
     {% set nearbyPagesLimit = 4 %}
-
-    <div>
-        <ul class="pagination">
-            {% if currentPage != 1 %}
-            <li class="page-item">
-                <a class="page-link" href="{{url}}{{query}}">First</a>
-            </li>
+    <ul class="win95-pagination">
+        {% if currentPage != 1 %}
+        <li class="win95-pagination__item">
+            <a class="win95-pagination__link" href="{{url}}{{query}}" title="First page">&laquo;&laquo;</a>
+        </li>
+        <li class="win95-pagination__item">
+            <a class="win95-pagination__link" href="{{url}}{{param}}/page/{{currentPage - 1}}{{query}}" title="Previous page">&laquo;</a>
+        </li>
+        {% endif %}
+        {% for i in 1..nbPages %}
+            {% if 0 == (currentPage - nearbyPagesLimit) - loop.index %}
+                <li class="win95-pagination__sep">&hellip;</li>
+            {% elseif 0 == (currentPage + nearbyPagesLimit) - loop.index %}
+                <li class="win95-pagination__sep">&hellip;</li>
+            {% elseif 0 < (currentPage - nearbyPagesLimit) - loop.index %}
+            {% elseif 0 > (currentPage + nearbyPagesLimit) - loop.index %}
+            {% else %}
+                <li class="win95-pagination__item{% if currentPage == loop.index %} win95-pagination__item--active{% endif %}">
+                    <a class="win95-pagination__link" href="{{url}}{{param}}/page/{{loop.index}}{{query}}">{{ loop.index }}</a>
+                </li>
             {% endif %}
-            {% for i in 1..nbPages %}
-                {% if 0 == (currentPage - nearbyPagesLimit) - loop.index %} {# dot before #}
-                {% elseif 0 == (currentPage + nearbyPagesLimit) - loop.index %} {# dot after #}
-                {% elseif 0 < (currentPage - nearbyPagesLimit) - loop.index %} {# hide all before #}
-                {% elseif 0 > (currentPage + nearbyPagesLimit) - loop.index %} {# hide all after #}
-                {% else %}
-                    <li {% if currentPage == loop.index  %} class="page-item active" {% else %} class="page-item" {% endif %}>
-                        <a class="page-link" href="{{url}}{{param}}/page/{{loop.index}}{{query}}">{{ loop.index }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-            {% if currentPage != nbPages %}
-            <li class="page-item">
-                <a class="page-link" href="{{url}}{{param}}/page/{{nbPages}}{{query}}">Last</a>
-            </li>
-            {% endif %}
-        </ul>
-    </div>
+        {% endfor %}
+        {% if currentPage != nbPages %}
+        <li class="win95-pagination__item">
+            <a class="win95-pagination__link" href="{{url}}{{param}}/page/{{currentPage + 1}}{{query}}" title="Next page">&raquo;</a>
+        </li>
+        <li class="win95-pagination__item">
+            <a class="win95-pagination__link" href="{{url}}{{param}}/page/{{nbPages}}{{query}}" title="Last page">&raquo;&raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
 {% endif %}
 {% endspaceless %}

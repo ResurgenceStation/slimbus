@@ -1,15 +1,3 @@
-<nav aria-label="breadcrumb" role="navigation">
-  <ol class="breadcrumb">
-    {% for n, u in nav %}
-      {% if loop.last %}
-        <li class="breadcrumb-item active">
-          {{n|raw}}
-        </li>
-        {% else %}
-        <li class="breadcrumb-item">
-          <a href="{{u}}">{{n|raw}}</a>
-        </li>
-      {% endif %}
-    {% endfor %}
-  </ol>
-</nav>
+{# Breadcrumbs are now rendered inline in the Win95 title bar (see
+   templates/base/index.html). This component stays for back-compat but
+   no longer emits a separate row of breadcrumb chips above the content. #}

@@ -1,45 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>{{statbus.app_name}} {% block pagetitle %}{% endblock %}</title>
+  <title>{{statbus.app_name}}{% block pagetitle %}{% endblock %}</title>
   {% include 'base/common/header.html' %}
 </head>
 <body>
-  {% block nav %} {{ include('base/nav.tpl') }} {% endblock %}
-  <main role="main">
-    <div class="container{% if wide is defined and wide %}-fluid{% endif %} position-relative" id="container">
+  {# ntOS95 Win95 window shell -- wraps EVERY page so chrome never shifts. #}
+  <div class="win95-window">
+
+    {# ---- title bar ---------------------------------------------------- #}
+    <div class="win95-titlebar">
+      <div class="win95-titlebar__brand">
+        {# 16x16 SVG placeholder icon -- inlined to avoid an asset request #}
+        <svg class="win95-titlebar__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <rect width="16" height="16" fill="#000080"/>
+          <rect x="1" y="1" width="14" height="14" fill="#c0c0c0"/>
+          <rect x="2" y="2" width="12" height="2" fill="#000080"/>
+          <rect x="2" y="5" width="3" height="1" fill="#000"/>
+          <rect x="6" y="5" width="2" height="1" fill="#000"/>
+          <rect x="9" y="5" width="5" height="1" fill="#000"/>
+          <rect x="2" y="7" width="6" height="1" fill="#000"/>
+          <rect x="9" y="7" width="5" height="1" fill="#000"/>
+          <rect x="2" y="9" width="4" height="1" fill="#000"/>
+          <rect x="7" y="9" width="7" height="1" fill="#000"/>
+          <rect x="2" y="11" width="9" height="1" fill="#000"/>
+          <rect x="2" y="13" width="6" height="1" fill="#000"/>
+        </svg>
+        <a href="{{path_for('statbus')}}">ReduxStation Statbus</a>
+        {% if breadcrumbs is defined and breadcrumbs|length > 1 %}
+          {% for label, url in breadcrumbs %}
+            {% if not loop.first %}
+              <span class="win95-titlebar__sep">\</span>
+              {% if loop.last %}<span>{{ label|raw }}</span>
+              {% else %}<a href="{{url}}">{{ label|raw }}</a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="win95-titlebar__controls" aria-hidden="true">
+        <div class="win95-titlebar__btn">_</div>
+        <div class="win95-titlebar__btn">&#9633;</div>
+        <div class="win95-titlebar__btn">&#10005;</div>
+      </div>
+    </div>
+
+    {# ---- menu bar (functional nav) ----------------------------------- #}
+    {% block nav %}{{ include('base/nav.tpl') }}{% endblock %}
+
+    {# ---- content ----------------------------------------------------- #}
+    <div class="win95-content" id="container">
       {{alert|raw}}
-      {% if breadcrumbs is defined and breadcrumbs|length > 1 %}
-        {% set nav = breadcrumbs %}
-        {% include('components/breadcrumbs.html') with nav %}
-      {% endif %}
       {% if classified is defined and classified %}
-      <div class="alert alert-warning">
-        Information in TGDB should be considered <strong>TLP:://AMBER</strong>, unless otherwise noted.
-      </div>
+        <div class="alert alert-warning">
+          Information in TGDB should be considered <strong>TLP://AMBER</strong>, unless otherwise noted.
+        </div>
       {% endif %}
-      {% block content %} {% endblock %}
+      {% block content %}{% endblock %}
     </div>
-  </main>
-  <footer>
-    <div class="container{% if wide is defined and wide %}-fluid{% endif %} position-relative" id="container">
-      <hr>
-      <div class="row">
-        <div class="col">
-          <p class="text-muted">All times are UTC</p>
-          <p class="text-muted">Data presented here should be treated as preliminary and non-operational</p>
-        </div>
-        <div class="col">
-          {% if settings.bug_reports %}
-          <p class="text-muted">Found a bug? Have a feature request? Report it <a href="{{settings.bug_reports}}" target="_blank" rel="noopener noreferrer">here</a>.</p>
-          {% endif %}
-          <samp class="text-muted" id="clock">{{app.currentDate}}</samp>
-        </div>
-      </div>
+
+    {# ---- status bar -------------------------------------------------- #}
+    <div class="win95-statusbar">
+      <div class="win95-statusbar__cell">{% block status_left %}Ready{% endblock %}</div>
+      <div class="win95-statusbar__cell">All times UTC</div>
+      <div class="win95-statusbar__cell"><samp id="clock">{{app.currentDate}}</samp></div>
     </div>
-  </footer>
+
+  </div>
+
+  {# ---- footer (kept minimal, sits under the window) ------------------ #}
+  <div class="win95-footer">
+    <div>Data presented here should be treated as preliminary and non-operational.</div>
+    <div>
+      {% if settings.bug_reports %}
+        Bug? Feature? <a href="{{settings.bug_reports}}" target="_blank" rel="noopener noreferrer">Report</a>.
+      {% endif %}
+    </div>
+  </div>
+
   {% include 'base/common/footer.html' %}
-  {% block js %}
-  {% endblock %}
+  {% block js %}{% endblock %}
 </body>
 </html>
