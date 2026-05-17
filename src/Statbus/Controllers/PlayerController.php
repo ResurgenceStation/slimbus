@@ -228,7 +228,7 @@ class PlayerController Extends Controller {
     return $this->DB->cell("SELECT count(tbl_round.id) FROM tbl_connection_log
       JOIN tbl_round ON tbl_connection_log.round_id = tbl_round.id
       WHERE tbl_connection_log.ckey = ?
-      AND tbl_round.shutdown_datetime IS NOT NULL", $ckey);
+      AND tbl_round.end_datetime IS NOT NULL", $ckey);
   }
 
   public function countMessages($ckey){

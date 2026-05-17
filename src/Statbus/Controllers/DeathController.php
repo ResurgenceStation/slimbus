@@ -172,7 +172,7 @@ class DeathController Extends Controller{
         tbl_death.suicide
         FROM tbl_death
         LEFT JOIN tbl_round ON tbl_round.id = tbl_death.round_id
-        WHERE tbl_round.shutdown_datetime IS NOT NULL
+        WHERE tbl_round.end_datetime IS NOT NULL
         AND tbl_death.id = ?", $id);
     $death = $this->deathModel->parseDeath($death);
     $url = parent::getFullURL($this->router->pathFor('death.single',['id'=>$death->id]));

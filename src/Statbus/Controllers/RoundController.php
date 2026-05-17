@@ -317,12 +317,12 @@ class RoundController Extends Controller {
     $this->pages = ceil($this->DB->cell("SELECT count(tbl_round.id) FROM tbl_connection_log
         JOIN tbl_round ON tbl_connection_log.round_id = tbl_round.id
         WHERE tbl_connection_log.ckey = ?
-        AND tbl_round.shutdown_datetime IS NOT NULL", $ckey) / $this->per_page);
+        AND tbl_round.end_datetime IS NOT NULL", $ckey) / $this->per_page);
     $rounds = $this->DB->run("SELECT $this->columns
       FROM tbl_connection_log
       JOIN tbl_round ON tbl_connection_log.round_id = tbl_round.id
       WHERE tbl_connection_log.ckey = ?
-      AND tbl_round.shutdown_datetime IS NOT NULL
+      AND tbl_round.end_datetime IS NOT NULL
       ORDER BY tbl_connection_log.`datetime` DESC
       LIMIT ?,?", $ckey, ($this->page * $this->per_page) - $this->per_page, $this->per_page);
     foreach ($rounds as &$round){
@@ -376,7 +376,7 @@ class RoundController Extends Controller {
     if(!$this->userCanAccessTGDB){
       return false;
     }
-    $rounds = $this->DB->run("SELECT DISTINCT(*) FROM tbl_round WHERE `shutdown_datetime` IS NULL LIMIT 0, 4 ORDER BY id DESC");
+    $rounds = $this->DB->run("SELECT DISTINCT(*) FROM tbl_round WHERE `end_datetime` IS NULL LIMIT 0, 4 ORDER BY id DESC");
     return $request->withJson($rounds);
   }
 
@@ -425,7 +425,7 @@ class RoundController Extends Controller {
         AND tbl_round.game_mode_result IS NOT NULL
         AND tbl_round.game_mode_result != 'undefined'
         AND tbl_round.initialize_datetime BETWEEN ? AND ?
-        AND tbl_round.shutdown_datetime IS NOT NULL
+        AND tbl_round.end_datetime IS NOT NULL
         GROUP BY tbl_round.game_mode, tbl_round.game_mode_result
         ORDER BY tbl_round.game_mode ASC, rounds DESC;", $start, $end);
       usort($data, function($a, $b){
